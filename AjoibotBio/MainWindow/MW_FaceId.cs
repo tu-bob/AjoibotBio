@@ -33,7 +33,7 @@ namespace AjoibotBio.MainWindow
 
         public void OnNewCameraFrame(object sender, VideoData data)
         {
-            var imageBase64 = "";
+            var imageBase64 = "data:image/bmp;base64,";
             using (Stream stream = new MemoryStream(data.frame))
             {
                 BitmapImage image = new BitmapImage();
@@ -43,7 +43,7 @@ namespace AjoibotBio.MainWindow
                 image.StreamSource = stream;
                 image.EndInit();
                 image.Freeze();
-                imageBase64 = BitmapFormat.BitmapToBase64(image);
+                imageBase64 += BitmapFormat.BitmapToBase64(image);
             }
             this.Dispatcher.Invoke(() =>
             {
