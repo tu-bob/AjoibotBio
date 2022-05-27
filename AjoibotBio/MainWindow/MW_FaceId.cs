@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AjoibotBio.Utils;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -32,20 +33,21 @@ namespace AjoibotBio.MainWindow
 
         public void OnNewCameraFrame(object sender, VideoData data)
         {
-            BitmapImage image = new BitmapImage();
+            var imageBase64 = "";
             using (Stream stream = new MemoryStream(data.frame))
             {
-
+                BitmapImage image = new BitmapImage();
                 stream.Position = 0;
                 image.BeginInit();
                 image.CacheOption = BitmapCacheOption.OnLoad;
                 image.StreamSource = stream;
                 image.EndInit();
                 image.Freeze();
+                imageBase64 = BitmapFormat.BitmapToBase64(image);
             }
             this.Dispatcher.Invoke(() =>
             {
-                Image.Source = image;
+                MainWebView.ExecuteScriptAsync($"UpdateFrame('{imageBase64}')");
             });
         }
     }

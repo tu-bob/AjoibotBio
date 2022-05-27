@@ -15,11 +15,13 @@ namespace AjoibotBio.MainWindow
         {
             InitializeComponent();
 
+            MainWebView.Source = new Uri("https://office.tajmedun.tj/testdemo.php");
+
             MainWindowInitialized += InitFaceIdCamera;
 
             MainWindowInitialized.Invoke(this, EventArgs.Empty);    
 
-            Debug.WriteLine("inited");
+           
         }
     }
 }
