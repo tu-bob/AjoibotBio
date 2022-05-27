@@ -7,11 +7,10 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace DemoCamApp
+namespace ZKFaceId
 {
     internal class ZKHID
     {
-        private IntPtr Handle;
 
         #region C++ library import
 
@@ -23,6 +22,15 @@ namespace DemoCamApp
 
         [DllImport(PathToDll)]
         private static extern int ZKHID_Close(IntPtr handle);
+
+        [DllImport(PathToDll)]
+        private static extern int ZKHID_Init();
+
+        [DllImport(PathToDll)]
+        private static extern int ZKHID_Terminate();
+
+        [DllImport(PathToDll)]
+        private static extern int ZKHID_GetCount(out int count);
 
         [DllImport(PathToDll)]
         private static extern int ZKHID_GetConfig(IntPtr handle, int type, out string json,out int len);
@@ -37,10 +45,38 @@ namespace DemoCamApp
         private static extern int ZKHID_SnapShot(IntPtr handle, int snapType, StringBuilder snapData, out int size);
 
         #endregion
-        
-        public int Open(int index)
+
+        private int Index;
+
+        private IntPtr Handle;
+
+        public ZKHID(int index)
         {
-            return ZKHID_Open(index, out Handle);
+            Index = index;
+        }
+        public int Init()
+        {
+            return ZKHID_Init();
+        }
+        public int Terminate()
+        {
+            return ZKHID_Terminate();
+        }
+
+        public void StartDevice()
+        {
+            Init();
+            Open();
+        }
+
+        public int GetCount(out int count)
+        {
+            return ZKHID_GetCount(out count);
+        }
+
+        public int Open()
+        {
+            return ZKHID_Open(Index, out Handle);
         }
 
         public int Close()
@@ -48,25 +84,18 @@ namespace DemoCamApp
             return ZKHID_Close(Handle);
         }
 
-        public void RegisterFace()
+        public RegistrationData RegisterFace(RegisterFaceConfig config)
         {
             int length = 1024 * 1024;
-       
-            var config = new RegisterFaceConfig(true, true, true);
+        
             string json = JsonSerializer.Serialize(config);
 
             StringBuilder faceData = new StringBuilder(new String(' ', length));
 
-            //int size = 2 * 1024 * 1024;
-            //var snapData = new StringBuilder(new String(' ', size));
-
-            //var image = ZKHID_SnapShot(Handle, 0, snapData, out size);
-
             var res = ZKHID_RegisterFace(Handle, json, faceData, out length);
 
-            RegistrationData registrationData = JsonSerializer.Deserialize<RegistrationData>(faceData.ToString());
-            var m = registrationData.data;
-            var ress = faceData.ToString().Trim();
+            return JsonSerializer.Deserialize<RegistrationData>(faceData.ToString());
+            //return faceData.ToString();
         }
     }
 }

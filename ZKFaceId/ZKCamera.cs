@@ -1,5 +1,8 @@
-﻿using System;
+﻿using DemoCamApp.json;
+using System;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.Json;
 using ZKFaceId.Model;
 
 namespace ZKFaceId
@@ -90,6 +93,20 @@ namespace ZKFaceId
             var customDelegate = new CustomDataCallback(OnGetCustomData);
             var pUserParam = 1;
             ZKCamera_SetDataCallback(Handle, Marshal.GetFunctionPointerForDelegate(VideoCallbackDelegate), IntPtr.Zero, (IntPtr)pUserParam);
+        }
+
+
+        public RegistrationData RegisterFace()
+        {
+            var hid = new ZKHID(0);
+
+            hid.StartDevice();
+
+            var data = hid.RegisterFace(new RegisterFaceConfig(true, true, true));
+
+            hid.Close();
+
+            return data;
         }
     }
 }

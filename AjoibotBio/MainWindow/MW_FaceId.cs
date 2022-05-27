@@ -1,4 +1,5 @@
-﻿using AjoibotBio.Utils;
+﻿using AjoibotBio.Js;
+using AjoibotBio.Utils;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -49,6 +50,11 @@ namespace AjoibotBio.MainWindow
             {
                 MainWebView.ExecuteScriptAsync($"UpdateFrame('{imageBase64}')");
             });
+        }
+
+        private void MainWebView_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
+        {
+            MainWebView.CoreWebView2.AddHostObjectToScript("faceId", new FaceId());
         }
     }
 }
