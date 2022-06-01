@@ -3,6 +3,7 @@ using AjoibotBio.Utils;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
@@ -28,6 +29,7 @@ namespace AjoibotBio.MainWindow
 
                 MainViewModel.Visible.StartVideoStream();
                 MainViewModel.Visible.NewFrame += OnNewCameraFrame;
+                MainViewModel.Visible.NewBioData += OnNewBioData;
             }
         });
         }
@@ -52,6 +54,14 @@ namespace AjoibotBio.MainWindow
             });
         }
 
+        public void OnNewBioData(object sender, string data)
+        {
+
+            this.Dispatcher.Invoke(() =>
+            {
+                MainWebView.ExecuteScriptAsync($"SetNewBioData({data})");
+            });
+        }
         private void MainWebView_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
         {
             MainWebView.CoreWebView2.AddHostObjectToScript("faceId", new FaceId());

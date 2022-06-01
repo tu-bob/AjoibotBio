@@ -36,7 +36,7 @@ namespace ZKFaceId
 
         public event EventHandler<VideoData> NewFrame;
 
-        public event EventHandler<BioData> NewBioData;
+        public event EventHandler<string> NewBioData;
 
         private int Index { get; set; }
         private int Width { get; set; }
@@ -90,9 +90,9 @@ namespace ZKFaceId
         public void OnGetCustomData(IntPtr pUserParam, CustomData data)
         {
             string response = Marshal.PtrToStringUTF8(data.customData);
-            var bioData = JsonSerializer.Deserialize<BioData>(response);
-            EventHandler<BioData> handler = NewBioData;
-            if (handler != null) handler(this, bioData);
+            //var bioData = JsonSerializer.Deserialize<BioData>(response);
+            EventHandler<string> handler = NewBioData;
+            if (handler != null) handler(this, response);
             FreePointer(data.customData);
         }
 
