@@ -6,14 +6,9 @@ using System.Threading.Tasks;
 
 namespace ZKFaceId.Model
 {
-    public struct CustomData
+    public class Landmark
     {
-        public int frame_index;
-
-        public int width;
-
-        public int height;
-
-        public IntPtr customData;
+        public int count { get; set; }
+        public string data { get; set; }
     }
 }

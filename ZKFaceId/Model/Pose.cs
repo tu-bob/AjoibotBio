@@ -6,14 +6,10 @@ using System.Threading.Tasks;
 
 namespace ZKFaceId.Model
 {
-    public struct CustomData
+    public class Pose
     {
-        public int frame_index;
-
-        public int width;
-
-        public int height;
-
-        public IntPtr customData;
+        public double pitch { get; set; }
+        public double roll { get; set; }
+        public double yaw { get; set; }
     }
 }

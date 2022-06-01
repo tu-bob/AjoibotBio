@@ -6,14 +6,9 @@ using System.Threading.Tasks;
 
 namespace ZKFaceId.Model
 {
-    public struct CustomData
+    public class BioData
     {
-        public int frame_index;
-
-        public int width;
-
-        public int height;
-
-        public IntPtr customData;
+        public List<Face> face { get; set; }
+        public int label { get; set; }
     }
 }
