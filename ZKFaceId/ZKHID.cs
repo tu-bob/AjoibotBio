@@ -84,7 +84,7 @@ namespace ZKFaceId
             return ZKHID_Close(Handle);
         }
 
-        public RegistrationData RegisterFace(RegisterFaceConfig config)
+        public string RegisterFace(RegisterFaceConfig config)
         {
             int length = 20 * 1024 * 1024;
         
@@ -94,8 +94,8 @@ namespace ZKFaceId
 
             var res = ZKHID_RegisterFace(Handle, json, faceData, out length);
 
-            return JsonSerializer.Deserialize<RegistrationData>(faceData.ToString());
-            //return faceData.ToString();
+            //return JsonSerializer.Deserialize<RegistrationData>(faceData.ToString());
+            return faceData.ToString();
         }
     }
 }

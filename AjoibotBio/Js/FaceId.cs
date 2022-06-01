@@ -11,7 +11,7 @@ namespace AjoibotBio.Js
     {
         public string Register()
         {
-           return JsonSerializer.Serialize(MainViewModel.Visible.RegisterFace());
+           return MainViewModel.Visible.RegisterFace();
         }
     }
 }

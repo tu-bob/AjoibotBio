@@ -110,7 +110,7 @@ namespace ZKFaceId
         }
 
 
-        public RegistrationData RegisterFace()
+        public string RegisterFace()
         {
             var hid = new ZKHID(0);
 
