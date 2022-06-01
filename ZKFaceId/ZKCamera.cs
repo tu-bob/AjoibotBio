@@ -28,6 +28,8 @@ namespace ZKFaceId
 
         private VideoDataCallback VideoCallbackDelegate;
 
+        private CustomDataCallback CustomCallbackDelegate;
+
         public delegate void VideoDataCallback(IntPtr pUserParam, VideoData data);
 
         public delegate void CustomDataCallback(IntPtr pUserParam, CustomData data);
@@ -85,15 +87,21 @@ namespace ZKFaceId
 
         public void OnGetCustomData(IntPtr pUserParam, CustomData data)
         {
+            string res = Marshal.PtrToStringUTF8(data.customData);
 
         }
 
         public void StartVideoStream()
         {
             VideoCallbackDelegate = new VideoDataCallback(OnGetVideoData);
-            var customDelegate = new CustomDataCallback(OnGetCustomData);
+            CustomCallbackDelegate = new CustomDataCallback(OnGetCustomData);
             var pUserParam = 1;
-            ZKCamera_SetDataCallback(Handle, Marshal.GetFunctionPointerForDelegate(VideoCallbackDelegate), IntPtr.Zero, (IntPtr)pUserParam);
+            ZKCamera_SetDataCallback(
+                Handle, 
+                Marshal.GetFunctionPointerForDelegate(VideoCallbackDelegate),
+                Marshal.GetFunctionPointerForDelegate(CustomCallbackDelegate), 
+                (IntPtr)pUserParam
+                );
         }
 
 

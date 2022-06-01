@@ -6,14 +6,16 @@ using System.Threading.Tasks;
 
 namespace ZKFaceId.Model
 {
-    public class CustomData
+    public struct CustomData
     {
-        int frame_index;
+        public int frame_index;
 
-        int width;
+        public int width;
 
-        int height;
+        public int height;
 
-        IntPtr customData;
+        public IntPtr customData;
+
+        public byte[]? safeData;
     }
 }
