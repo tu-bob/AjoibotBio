@@ -19,9 +19,9 @@ namespace AjoibotBio.MainWindow
 
             MainWindowInitialized += InitFaceIdCamera;
 
-            MainWindowInitialized.Invoke(this, EventArgs.Empty);    
+            MainWindowInitialized.Invoke(this, EventArgs.Empty);
 
-           
+
         }
     }
 }

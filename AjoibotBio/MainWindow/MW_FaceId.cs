@@ -21,15 +21,15 @@ namespace AjoibotBio.MainWindow
                 //TODO handle errors
                 ZKCameraLib.Init();
 
-                if (ZKCameraLib.GetDeviceCount() > 1)
-                {
-                    MainViewModel.Visible = new ZKCamera(0);
-                    MainViewModel.NIR = new ZKCamera(1);
+            if (ZKCameraLib.GetDeviceCount() > 1)
+            {
+                MainViewModel.Visible = new ZKCamera(0);
+                MainViewModel.NIR = new ZKCamera(1);
 
-                    MainViewModel.Visible.StartVideoStream();
-                    MainViewModel.Visible.NewFrame += OnNewCameraFrame;
-                }
-            });
+                MainViewModel.Visible.StartVideoStream();
+                MainViewModel.Visible.NewFrame += OnNewCameraFrame;
+            }
+        });
         }
 
         public void OnNewCameraFrame(object sender, VideoData data)

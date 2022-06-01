@@ -86,7 +86,7 @@ namespace ZKFaceId
 
         public RegistrationData RegisterFace(RegisterFaceConfig config)
         {
-            int length = 1024 * 1024;
+            int length = 20 * 1024 * 1024;
         
             string json = JsonSerializer.Serialize(config);
 

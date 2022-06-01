@@ -79,6 +79,7 @@ namespace ZKFaceId
             Marshal.Copy(data.data, data.frame, 0, (int)data.data_length);
             EventHandler<VideoData> handler = NewFrame;
             if (handler != null) handler(this, data);
+            FreePointer(data.data);
         }
 
 
