@@ -122,5 +122,33 @@ namespace ZKFaceId
 
             return data;
         }
+
+
+        public string ManageModuleData(int type, string json)
+        {
+            var hid = new ZKHID(0);
+
+            hid.StartDevice();
+
+            var res = hid.ManageModuleData(type, json);
+
+            hid.Close();
+
+            return res;
+        }
+
+
+        public string PollMatchResult()
+        {
+            var hid = new ZKHID(0);
+
+            hid.StartDevice();
+
+            var data = hid.PollMatchResult();
+
+            hid.Close();
+
+            return data;
+        }
     }
 }

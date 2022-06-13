@@ -43,6 +43,12 @@ namespace ZKFaceId
 
         [DllImport(PathToDll)]
         private static extern int ZKHID_SnapShot(IntPtr handle, int snapType, StringBuilder snapData, out int size);
+              
+        [DllImport(PathToDll)]
+        private static extern int ZKHID_PollMatchResult(IntPtr handle, StringBuilder json, out int len);     
+       
+        [DllImport(PathToDll)]
+        private static extern int ZKHID_ManageModuleData(IntPtr handle, int type, string json, StringBuilder result, out int len);
 
         #endregion
 
@@ -96,6 +102,28 @@ namespace ZKFaceId
 
             //return JsonSerializer.Deserialize<RegistrationData>(faceData.ToString());
             return faceData.ToString();
+        }
+
+        public string ManageModuleData(int type, string json)
+        {
+            int length = 20 * 1024 * 1024;
+
+            StringBuilder result = new StringBuilder(new String(' ', length));
+
+            var res = ZKHID_ManageModuleData(Handle, type, json, result, out length);
+
+            return result.ToString();
+        }
+
+        public string PollMatchResult()
+        {
+            int length = 40 * 1024;
+
+            StringBuilder json = new StringBuilder(new String(' ', length));
+
+            var res = ZKHID_PollMatchResult(Handle, json, out length);
+
+            return json.ToString() ;
         }
     }
 }
