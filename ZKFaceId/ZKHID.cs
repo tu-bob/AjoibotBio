@@ -98,14 +98,11 @@ namespace ZKFaceId
         public string RegisterFace(string config)
         {
             int length = 20 * 1024 * 1024;
-        
-            //string json = JsonSerializer.Serialize(config);
 
             StringBuilder faceData = new StringBuilder(new String(' ', length));
 
             var res = ZKHID_RegisterFace(Handle, config, faceData, out length);
 
-            //return JsonSerializer.Deserialize<RegistrationData>(faceData.ToString());
             return faceData.ToString();
         }
 

@@ -45,6 +45,8 @@ namespace ZKFaceId
 
         private IntPtr Handle { get; set; }
 
+        private ZKHID HID { get; set; }
+
         public ZKCamera(int index)
         {
             Index = index;
@@ -64,11 +66,19 @@ namespace ZKFaceId
 
         private int OpenDevice(out IntPtr handle)
         {
-            return ZKCamera_OpenDevice(Index, Width, Height, Fps, out handle);
+            var res = ZKCamera_OpenDevice(Index, Width, Height, Fps, out handle);
+
+            HID = new ZKHID(Index);
+
+            HID.StartDevice();
+
+            return res;
         }
 
         public int CloseDevice()
         {
+            HID.Close();
+
             return ZKCamera_CloseDevice(Handle);
         }
 
@@ -101,37 +111,24 @@ namespace ZKFaceId
             CustomCallbackDelegate = new CustomDataCallback(OnGetCustomData);
             var pUserParam = 1;
             ZKCamera_SetDataCallback(
-                Handle, 
+                Handle,
                 Marshal.GetFunctionPointerForDelegate(VideoCallbackDelegate),
-                Marshal.GetFunctionPointerForDelegate(CustomCallbackDelegate), 
+                Marshal.GetFunctionPointerForDelegate(CustomCallbackDelegate),
                 (IntPtr)pUserParam
                 );
         }
 
 
-        public int SetConfig(int type,string json)
+        public int SetConfig(int type, string json)
         {
-            var hid = new ZKHID(0);
-
-            hid.StartDevice();
-
-            var data = hid.SetConfig(type, json);
-
-            hid.Close();
+            var data = HID.SetConfig(type, json);
 
             return data;
         }
 
         public string RegisterFace(string config)
         {
-            var hid = new ZKHID(0);
-
-            hid.StartDevice();
-
-            var data = hid.RegisterFace(config);
-            //var data = hid.RegisterFace(new RegisterFaceConfig(true, true, true));
-
-            hid.Close();
+            var data = HID.RegisterFace(config);
 
             return data;
         }
@@ -139,13 +136,7 @@ namespace ZKFaceId
 
         public string ManageModuleData(int type, string json)
         {
-            var hid = new ZKHID(0);
-
-            hid.StartDevice();
-
-            var res = hid.ManageModuleData(type, json);
-
-            hid.Close();
+            var res = HID.ManageModuleData(type, json);
 
             return res;
         }
@@ -153,13 +144,7 @@ namespace ZKFaceId
 
         public string PollMatchResult()
         {
-            var hid = new ZKHID(0);
-
-            hid.StartDevice();
-
-            var data = hid.PollMatchResult();
-
-            hid.Close();
+            var data = HID.PollMatchResult();
 
             return data;
         }
