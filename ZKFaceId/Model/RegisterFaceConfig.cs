@@ -8,6 +8,8 @@ namespace DemoCamApp.json
         public bool faceInfo {get;set;}
         public bool picture { get; set; }
 
+        //public Image image { get; set; }
+
 
         public RegisterFaceConfig(bool feature, bool faceInfo, bool picture)
         {

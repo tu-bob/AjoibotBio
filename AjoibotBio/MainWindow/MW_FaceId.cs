@@ -1,7 +1,6 @@
 ﻿using AjoibotBio.Js;
 using AjoibotBio.Utils;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -22,16 +21,16 @@ namespace AjoibotBio.MainWindow
                 //TODO handle errors
                 ZKCameraLib.Init();
 
-            if (ZKCameraLib.GetDeviceCount() > 1)
-            {
-                MainViewModel.Visible = new ZKCamera(0);
-                MainViewModel.NIR = new ZKCamera(1);
+                if (ZKCameraLib.GetDeviceCount() > 1)
+                {
+                    MainViewModel.Visible = new ZKCamera(0);
+                    MainViewModel.NIR = new ZKCamera(1);
 
-                MainViewModel.Visible.StartVideoStream();
-                MainViewModel.Visible.NewFrame += OnNewCameraFrame;
-                MainViewModel.Visible.NewBioData += OnNewBioData;
-            }
-        });
+                    MainViewModel.Visible.StartVideoStream();
+                    MainViewModel.Visible.NewFrame += OnNewCameraFrame;
+                    MainViewModel.Visible.NewCustomData += OnNewCustomData;
+                }
+            });
         }
 
         public void OnNewCameraFrame(object sender, VideoData data)
@@ -54,12 +53,11 @@ namespace AjoibotBio.MainWindow
             });
         }
 
-        public void OnNewBioData(object sender, string data)
-        {
-
+        public void OnNewCustomData(object sender, CustomData data)
+        { 
             this.Dispatcher.Invoke(() =>
             {
-                MainWebView.ExecuteScriptAsync($"SetNewBioData({data})");
+                MainWebView.ExecuteScriptAsync($"SetNewBioData({data.bioData}, {data.width}, {data.height})");
             });
         }
         private void MainWebView_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)

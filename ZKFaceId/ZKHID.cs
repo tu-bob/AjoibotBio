@@ -80,6 +80,11 @@ namespace ZKFaceId
             return ZKHID_GetCount(out count);
         }
 
+        public int SetConfig(int type, string json)
+        {
+            return ZKHID_SetConfig(Handle, type, json);
+        }
+
         public int Open()
         {
             return ZKHID_Open(Index, out Handle);
@@ -90,15 +95,15 @@ namespace ZKFaceId
             return ZKHID_Close(Handle);
         }
 
-        public string RegisterFace(RegisterFaceConfig config)
+        public string RegisterFace(string config)
         {
             int length = 20 * 1024 * 1024;
         
-            string json = JsonSerializer.Serialize(config);
+            //string json = JsonSerializer.Serialize(config);
 
             StringBuilder faceData = new StringBuilder(new String(' ', length));
 
-            var res = ZKHID_RegisterFace(Handle, json, faceData, out length);
+            var res = ZKHID_RegisterFace(Handle, config, faceData, out length);
 
             //return JsonSerializer.Deserialize<RegistrationData>(faceData.ToString());
             return faceData.ToString();

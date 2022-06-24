@@ -16,6 +16,7 @@ namespace AjoibotBio.MainWindow
             InitializeComponent();
 
             MainWebView.Source = new Uri("https://zhiwj.coded.tj/main.php");
+            //MainWebView.Source = new Uri("https://office.tajmedun/api/faceid.php");
 
             MainWindowInitialized += InitFaceIdCamera;
 

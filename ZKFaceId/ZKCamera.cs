@@ -36,7 +36,7 @@ namespace ZKFaceId
 
         public event EventHandler<VideoData> NewFrame;
 
-        public event EventHandler<string> NewBioData;
+        public event EventHandler<CustomData> NewCustomData;
 
         private int Index { get; set; }
         private int Width { get; set; }
@@ -89,10 +89,9 @@ namespace ZKFaceId
 
         public void OnGetCustomData(IntPtr pUserParam, CustomData data)
         {
-            string response = Marshal.PtrToStringUTF8(data.customData);
-            //var bioData = JsonSerializer.Deserialize<BioData>(response);
-            EventHandler<string> handler = NewBioData;
-            if (handler != null) handler(this, response);
+            data.bioData = Marshal.PtrToStringUTF8(data.customData);
+            EventHandler<CustomData> handler = NewCustomData;
+            if (handler != null) handler(this, data);
             FreePointer(data.customData);
         }
 
@@ -110,13 +109,27 @@ namespace ZKFaceId
         }
 
 
-        public string RegisterFace()
+        public int SetConfig(int type,string json)
         {
             var hid = new ZKHID(0);
 
             hid.StartDevice();
 
-            var data = hid.RegisterFace(new RegisterFaceConfig(true, true, true));
+            var data = hid.SetConfig(type, json);
+
+            hid.Close();
+
+            return data;
+        }
+
+        public string RegisterFace(string config)
+        {
+            var hid = new ZKHID(0);
+
+            hid.StartDevice();
+
+            var data = hid.RegisterFace(config);
+            //var data = hid.RegisterFace(new RegisterFaceConfig(true, true, true));
 
             hid.Close();
 

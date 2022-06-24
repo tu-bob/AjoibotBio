@@ -10,9 +10,14 @@ namespace AjoibotBio.Js
     [ComVisible(true)]
     public class FaceId
     {
-        public string Register()
+        public string Register(string config)
         {
-           return MainViewModel.Visible.RegisterFace();
+           return MainViewModel.Visible.RegisterFace(config);
+        }
+
+        public int SetConfig(int type, string json)
+        {
+            return MainViewModel.Visible.SetConfig(type, json);
         }
 
         public string PollMatchResult()

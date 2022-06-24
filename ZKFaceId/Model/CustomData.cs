@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace ZKFaceId.Model
@@ -14,6 +15,10 @@ namespace ZKFaceId.Model
 
         public int height;
 
+        [JsonIgnore]
         public IntPtr customData;
+
+        //json
+        public string? bioData;
     }
 }
