@@ -81,9 +81,5 @@ namespace AjoibotBio.MainWindow
                 MainWebView.ExecuteScriptAsync($"SetNewBioData({data.bioData}, {data.width}, {data.height})");
             });
         }
-        private void MainWebView_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
-        {
-            MainWebView.CoreWebView2.AddHostObjectToScript("faceId", new FaceId());
-        }
     }
 }

@@ -44,8 +44,8 @@ namespace ZKFingerprint
             //GlobalVariables.DevHandles.Remove(DevHandle);
             if (IntPtr.Zero == (DevHandle = zkfp2.OpenDevice(DeviceIndex)))
             {
-                if (DeviceDisconnected != null)
-                    Application.Current.Dispatcher.Invoke(DeviceDisconnected);
+                //if (DeviceDisconnected != null)
+                //    Application.Current.Dispatcher.Invoke(DeviceDisconnected);
                 return false;
             }
             //GlobalVariables.DevHandles.Add(DevHandle);
@@ -54,6 +54,14 @@ namespace ZKFingerprint
 
         public bool DisconnectDevice()
         {
+            for (int i = 101; i < 105; i++)
+            {
+                int code = i;
+                byte[] turnOff = new byte[4];
+                zkfp2.Int2ByteArray(0, turnOff);
+                var ret = zkfp2.SetParameters(DevHandle, code, turnOff, 4);
+            }
+
             if (zkfp2.CloseDevice(DevHandle) == 0)
             {
                 //TODO replace with event
@@ -112,8 +120,8 @@ namespace ZKFingerprint
                     }
                 }
             }
-            if (DeviceDisconnected != null)
-                Application.Current.Dispatcher.Invoke(DeviceDisconnected);
+            //if (DeviceDisconnected != null)
+            //    Application.Current.Dispatcher.Invoke(DeviceDisconnected);
         }
 
         /// <summary>

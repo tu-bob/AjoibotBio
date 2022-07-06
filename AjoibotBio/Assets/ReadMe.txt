@@ -1,0 +1,2 @@
+HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Google\Chrome
+ExternalProtocolDialogShowAlwaysOpenCheckbox = 1

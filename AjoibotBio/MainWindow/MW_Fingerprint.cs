@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -11,6 +12,8 @@ namespace AjoibotBio.MainWindow
     {
         public void InitFingerprintScanner(object sender, EventArgs e)
         {
+            MainViewModel.ZkScanners = new List<ZkTeckoScanner>();
+
             Task.Run(() =>
             {
                 int res = 0;
@@ -39,17 +42,21 @@ namespace AjoibotBio.MainWindow
             {
                 DeviceIndex = index
             };
+
             if (!scanner.ConnectDevice())
             {
                 Thread.CurrentThread.Interrupt();
             }
+            else
+            {
+                MainViewModel.ZkScanners.Add(scanner);
+            }
 
             scanner.FingerPrintCaptured += AjoibotFingerInvoke;
-            //scanner.DeviceDisconnected += SetWindowsSize;
+            scanner.DeviceDisconnected += () => { MainViewModel.ZkScanners.Remove(scanner); };
 
             scanner.CapturePrint();
         }
-
 
         private void AjoibotFingerInvoke(int index, string image, string print)
         {
