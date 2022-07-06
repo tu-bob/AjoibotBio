@@ -2,7 +2,6 @@
 using AjoibotBio.Utils;
 using System;
 using System.IO;
-using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
@@ -13,23 +12,45 @@ namespace AjoibotBio.MainWindow
 {
     public partial class MainWindow : Window
     {
-
         private void InitFaceIdCamera(object sender, EventArgs e)
         {
             Task.Run(() =>
             {
-                //TODO handle errors
-                ZKCameraLib.Init();
+                var result = ZKCameraLib.Init();
 
-                if (ZKCameraLib.GetDeviceCount() > 1)
+                if (result == 0)
                 {
-                    MainViewModel.Visible = new ZKCamera(0);
-                    MainViewModel.NIR = new ZKCamera(1);
+                    Log.Debug("CameraLib initialized");
+                    var count = ZKCameraLib.GetDeviceCount();
+                    if (count > 1)
+                    {
+                        try
+                        {
+                            //MainViewModel.Visible = new ZKCamera(0);
+                            MainViewModel.Visible = ZKCameraLib.GetDeviceType(0) == 1? new ZKCamera(0) : new ZKCamera(1);
+                            MainViewModel.NIR = ZKCameraLib.GetDeviceType(0) == 1 ? new ZKCamera(1) : new ZKCamera(0);
 
-                    MainViewModel.Visible.StartVideoStream();
-                    MainViewModel.Visible.NewFrame += OnNewCameraFrame;
-                    MainViewModel.Visible.NewCustomData += OnNewCustomData;
+                            MainViewModel.Visible.InitHID();
+                            MainViewModel.Visible.StartVideoStream();
+                            MainViewModel.Visible.NewFrame += OnNewCameraFrame;
+                            MainViewModel.Visible.NewCustomData += OnNewCustomData;
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Fatal(e);
+                        }
+                    }
+                    else
+                    {
+                        Log.Debug("No camera connected. Device count equals to " + count);
+                    }
+
                 }
+                else
+                {
+                    Log.Error("Failed to init CameraLib.  Error code " + result);
+                }
+
             });
         }
 

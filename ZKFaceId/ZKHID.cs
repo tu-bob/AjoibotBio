@@ -1,4 +1,5 @@
 ﻿using DemoCamApp.json;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace ZKFaceId
 {
-    internal class ZKHID
+    public class ZKHID
     {
 
         #region C++ library import
@@ -56,6 +57,9 @@ namespace ZKFaceId
 
         private IntPtr Handle;
 
+        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+
         public ZKHID(int index)
         {
             Index = index;
@@ -71,8 +75,11 @@ namespace ZKFaceId
 
         public void StartDevice()
         {
-            Init();
-            Open();
+            if (Init() != 0)
+                throw new Exception("Failed to init HIDLibrary");
+
+            if (Open() != 0)
+                throw new Exception("Failed to open HID device");
         }
 
         public int GetCount(out int count)

@@ -59,7 +59,9 @@ namespace ZKFaceId
 
             var handle = IntPtr.Zero;
             //TODO handle errors
-            OpenDevice(out handle);
+
+            if (OpenDevice(out handle) != 0)
+                throw new Exception("Failed to init camera with index " + index);
 
             Handle = handle;
         }
@@ -68,12 +70,18 @@ namespace ZKFaceId
         {
             var res = ZKCamera_OpenDevice(Index, Width, Height, Fps, out handle);
 
-            HID = new ZKHID(Index);
-
-            HID.StartDevice();
+            if (res != 0)
+                throw new Exception("Failed to open device with index: " + Index);
 
             return res;
         }
+
+        public void InitHID() {
+            HID = new ZKHID(Index);
+
+            HID.StartDevice();
+        }
+
 
         public int CloseDevice()
         {
