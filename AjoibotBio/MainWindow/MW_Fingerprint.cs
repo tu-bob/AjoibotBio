@@ -41,7 +41,7 @@ namespace AjoibotBio.MainWindow
             };
             if (!scanner.ConnectDevice())
             {
-                Thread.CurrentThread.Abort();
+                Thread.CurrentThread.Interrupt();
             }
 
             scanner.FingerPrintCaptured += AjoibotFingerInvoke;

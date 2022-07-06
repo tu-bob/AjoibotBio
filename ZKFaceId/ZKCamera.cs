@@ -1,8 +1,5 @@
-﻿using DemoCamApp.json;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Text.Json;
 using ZKFaceId.Model;
 
 namespace ZKFaceId
@@ -11,7 +8,7 @@ namespace ZKFaceId
     {
         #region C++ library import
 
-        private const string PathToDll = "lib/x64/ZKCameraLib.dll";
+        private const string PathToDll = "lib/x86/ZKCameraLib.dll";
 
         [DllImport(PathToDll)]
         private static extern int ZKCamera_OpenDevice(int index, int w, int h, int fps, out IntPtr handle);
@@ -34,9 +31,9 @@ namespace ZKFaceId
 
         public delegate void CustomDataCallback(IntPtr pUserParam, CustomData data);
 
-        public event EventHandler<VideoData> NewFrame;
+        public event EventHandler<byte[]> NewFrame;
 
-        public event EventHandler<CustomData> NewCustomData;
+        public event EventHandler<CustomBioData> NewCustomData;
 
         private int Index { get; set; }
         private int Width { get; set; }
@@ -97,20 +94,21 @@ namespace ZKFaceId
 
         public void OnGetVideoData(IntPtr pUserParam, VideoData data)
         {
-            data.frame = new byte[data.data_length];
-            Marshal.Copy(data.data, data.frame, 0, (int)data.data_length);
-            EventHandler<VideoData> handler = NewFrame;
-            if (handler != null) handler(this, data);
+            var frame = new byte[data.data_length];
+            Marshal.Copy(data.data, frame, 0, (int)data.data_length);
             FreePointer(data.data);
+            EventHandler<byte[]> handler = NewFrame;
+            if (handler != null) handler(this, frame);
+       
         }
 
-
+        //Throws error with x86 lib
         public void OnGetCustomData(IntPtr pUserParam, CustomData data)
         {
-            data.bioData = Marshal.PtrToStringUTF8(data.customData);
-            EventHandler<CustomData> handler = NewCustomData;
-            if (handler != null) handler(this, data);
-            FreePointer(data.customData);
+            //var cBioData = new CustomBioData(data, Marshal.PtrToStringUTF8(data.customData));
+            //EventHandler<CustomBioData> handler = NewCustomData;
+            //if (handler != null) handler(this, cBioData);
+            //FreePointer(data.customData);
         }
 
         public void StartVideoStream()
@@ -121,7 +119,9 @@ namespace ZKFaceId
             ZKCamera_SetDataCallback(
                 Handle,
                 Marshal.GetFunctionPointerForDelegate(VideoCallbackDelegate),
-                Marshal.GetFunctionPointerForDelegate(CustomCallbackDelegate),
+                //Marshal.GetFunctionPointerForDelegate(CustomCallbackDelegate),
+                IntPtr.Zero,
+                //IntPtr.Zero,
                 (IntPtr)pUserParam
                 );
         }

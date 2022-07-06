@@ -15,7 +15,7 @@ namespace ZKFaceId
 
         #region C++ library import
 
-        private const string PathToDll = "lib/x64/ZKHIDLib.dll";
+        private const string PathToDll = "lib/x86/ZKHIDLib.dll";
 
 
         [DllImport(PathToDll)]

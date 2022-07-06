@@ -54,10 +54,10 @@ namespace AjoibotBio.MainWindow
             });
         }
 
-        public void OnNewCameraFrame(object sender, VideoData data)
+        public void OnNewCameraFrame(object sender, byte[] frame)
         {
             var imageBase64 = "data:image/bmp;base64,";
-            using (Stream stream = new MemoryStream(data.frame))
+            using (Stream stream = new MemoryStream(frame))
             {
                 BitmapImage image = new BitmapImage();
                 stream.Position = 0;
@@ -74,7 +74,7 @@ namespace AjoibotBio.MainWindow
             });
         }
 
-        public void OnNewCustomData(object sender, CustomData data)
+        public void OnNewCustomData(object sender, CustomBioData data)
         { 
             this.Dispatcher.Invoke(() =>
             {

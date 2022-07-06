@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AjoibotBio": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

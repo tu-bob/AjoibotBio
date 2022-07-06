@@ -11,6 +11,6 @@ namespace ZKFaceId.Model
 
         public IntPtr data;
 
-        public byte[]? frame;
+        //public byte[]? frame;
     }
 }

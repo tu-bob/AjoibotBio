@@ -4,7 +4,7 @@ namespace ZKFaceId
 {
     public class ZKCameraLib
     {
-        private const string PathToDll = "lib/x64/ZKCameraLib.dll";
+        private const string PathToDll = "lib/x86/ZKCameraLib.dll";
 
         [DllImport(PathToDll)]
         private static extern int ZKCamera_Init();

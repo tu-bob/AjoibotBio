@@ -16,12 +16,12 @@ namespace ZKFaceId.Model
 
         public string bioData;
 
-        public CustomBioData(CustomData data)
+        public CustomBioData(CustomData data, string bioData)
         {
             frame_index = data.frame_index;
             width = data.width;
             height = data.height;
-            bioData = data.bioData;
+            this.bioData = bioData;
         }
     }
 }
