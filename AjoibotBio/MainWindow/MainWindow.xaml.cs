@@ -23,9 +23,11 @@ namespace AjoibotBio.MainWindow
             CheckPrerequisits();
 
             //MainWebView.Source = new Uri("https://zhiwj.coded.tj/main.php");
-            MainWebView.Source = new Uri("https://office.tajmedun.tj/api/bio/index.php");
+            MainWebView.Source = new Uri("https://office.tajmedun.tj/api/password.php");
 
-            MainWindowInitialized += InitFaceIdCamera;
+            //MainWindowInitialized += InitFaceIdCamera;
+
+            MainWindowInitialized += InitFingerprintScanner;
 
             MainWindowInitialized.Invoke(this, EventArgs.Empty);
 

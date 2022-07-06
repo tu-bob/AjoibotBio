@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Lib\libzkfpcsharp.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Lib\libzkfpcsharp.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="libzkfpcsharp">
+      <HintPath>Lib\libzkfpcsharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

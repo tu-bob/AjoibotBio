@@ -5,6 +5,7 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
+    <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,6 +15,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ZKFaceId\ZKFaceId.csproj" />
+    <ProjectReference Include="..\ZKFingerprint\ZKFingerprint.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="libzkfpcsharp">
+      <HintPath>..\ZKFingerprint\Lib\libzkfpcsharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
