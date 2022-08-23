@@ -40,6 +40,8 @@ namespace AjoibotBio.MainWindow
 
             MainWindowInitialized += InitFingerprintScanner;
 
+            MainWindowInitialized += ParseUri;
+
             MainWindowInitialized.Invoke(this, EventArgs.Empty);
 
             AppRestarted += ParseUri;
@@ -51,6 +53,10 @@ namespace AjoibotBio.MainWindow
             {
                 Log.Error("WebView2 environment is not installed on current machine");
             }
+        }
+
+        private void ParseUri(object sender, EventArgs e) {
+            ParseUri();
         }
 
         private void ParseUri()
@@ -73,10 +79,10 @@ namespace AjoibotBio.MainWindow
 
         private void NavigateToUri()
         {
+            Log.Debug($"Navigating to url: {MainViewModel.Uri}");
             if (string.IsNullOrEmpty(MainViewModel.Uri))
             {
                 this.printInMaivWebView("<h2 style='color:red'>Url was not provided<h2>");
-
             }
             else
             {
@@ -100,6 +106,7 @@ namespace AjoibotBio.MainWindow
                     if (!string.IsNullOrEmpty(line))
                     {
                         MainViewModel.Uri = "http://" + line.Split(':')[1];
+                        Log.Debug($"App restared with url: {MainViewModel.Uri}");
                         AppRestarted();
                     }
                     else
