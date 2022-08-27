@@ -12,22 +12,22 @@ namespace AjoibotBio.Js
     {
         public string Register(string config)
         {
-           return MainViewModel.Visible.RegisterFace(config);
+           return MainViewModel.Visible?.RegisterFace(config);
         }
 
-        public int SetConfig(int type, string json)
+        public int? SetConfig(int type, string json)
         {
-            return MainViewModel.Visible.SetConfig(type, json);
+            return MainViewModel.Visible?.SetConfig(type, json);
         }
 
         public string PollMatchResult()
         {
-            return MainViewModel.Visible.PollMatchResult();
+            return MainViewModel.Visible?.PollMatchResult();
         }
 
         public string ManageModuleData(int type, string json)
         {
-            return MainViewModel.Visible.ManageModuleData(type, json);
+            return MainViewModel.Visible?.ManageModuleData(type, json);
         }
     }
 }

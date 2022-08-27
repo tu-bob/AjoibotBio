@@ -6,9 +6,9 @@ namespace AjoibotBio.MainWindow
 {
     public static class MainViewModel
     {
-        public static ZKCamera Visible { get; set; }
+        public static ZKCamera? Visible { get; set; }
 
-        public static ZKCamera NIR { get; set; }
+        public static ZKCamera? NIR { get; set; }
 
         public static List<ZkTeckoScanner> ZkScanners { get; set; }
 

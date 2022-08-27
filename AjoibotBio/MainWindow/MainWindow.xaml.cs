@@ -33,8 +33,7 @@ namespace AjoibotBio.MainWindow
                 HwndSource.FromHwnd(MainWindow.WindowHandle)?.AddHook(new HwndSourceHook(HandleMessages));
             };
 
-            //MainWebView.Source = new Uri("https://zhiwj.coded.tj/main.php");
-            //MainWebView.Source = new Uri("https://office.tajmedun.tj/api/password.php");
+            MainViewModel.Uri = "https://office.kth.tj/api/bio/index.php";
 
             MainWindowInitialized += InitFaceIdCamera;
 

@@ -37,7 +37,21 @@ namespace AjoibotBio.MainWindow
                         }
                         catch (Exception e)
                         {
-                            Log.Fatal(e);
+                            Log.Fatal("Failed to initialize Face Recognition", e);
+
+                            if (MainViewModel.Visible != null)
+                            {
+                                var closeVisibleCode = MainViewModel.Visible.CloseDevice();
+                                MainViewModel.Visible = null;
+                                Log.Debug($"Visible camera closed with code {closeVisibleCode}");
+                            }
+
+                            if(MainViewModel.NIR != null)
+                            {
+                                var closeNIRCode = MainViewModel.NIR?.CloseDevice();
+                                MainViewModel.NIR = null;
+                                Log.Debug($"NIR camera closed with code {closeNIRCode}");
+                            }
                         }
                     }
                     else

@@ -42,7 +42,7 @@ namespace ZKFaceId
 
         private IntPtr Handle { get; set; }
 
-        private ZKHID HID { get; set; }
+        private ZKHID? HID { get; set; }
 
         public ZKCamera(int index)
         {
@@ -73,7 +73,8 @@ namespace ZKFaceId
             return res;
         }
 
-        public void InitHID() {
+        public void InitHID()
+        {
             HID = new ZKHID(Index);
 
             HID.StartDevice();
@@ -82,9 +83,19 @@ namespace ZKFaceId
 
         public int CloseDevice()
         {
-            HID.Close();
+            int res = -100;
+            try
+            {
+                HID?.Close();
 
-            return ZKCamera_CloseDevice(Handle);
+                res = ZKCamera_CloseDevice(Handle);
+            }
+            catch (Exception)
+            {
+            }
+
+
+            return res;
         }
 
         public void FreePointer(IntPtr pPointr)
@@ -99,7 +110,7 @@ namespace ZKFaceId
             FreePointer(data.data);
             EventHandler<byte[]> handler = NewFrame;
             if (handler != null) handler(this, frame);
-       
+
         }
 
         //Throws error with x86 lib
@@ -127,16 +138,16 @@ namespace ZKFaceId
         }
 
 
-        public int SetConfig(int type, string json)
+        public int? SetConfig(int type, string json)
         {
-            var data = HID.SetConfig(type, json);
+            var data = HID?.SetConfig(type, json);
 
             return data;
         }
 
         public string RegisterFace(string config)
         {
-            var data = HID.RegisterFace(config);
+            var data = HID?.RegisterFace(config);
 
             return data;
         }
@@ -144,7 +155,7 @@ namespace ZKFaceId
 
         public string ManageModuleData(int type, string json)
         {
-            var res = HID.ManageModuleData(type, json);
+            var res = HID?.ManageModuleData(type, json);
 
             return res;
         }
@@ -152,7 +163,7 @@ namespace ZKFaceId
 
         public string PollMatchResult()
         {
-            var data = HID.PollMatchResult();
+            var data = HID?.PollMatchResult();
 
             return data;
         }

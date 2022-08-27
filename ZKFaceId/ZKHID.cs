@@ -34,7 +34,7 @@ namespace ZKFaceId
         private static extern int ZKHID_GetCount(out int count);
 
         [DllImport(PathToDll)]
-        private static extern int ZKHID_GetConfig(IntPtr handle, int type, out string json,out int len);
+        private static extern int ZKHID_GetConfig(IntPtr handle, int type, out string json, out int len);
 
         [DllImport(PathToDll)]
         private static extern int ZKHID_SetConfig(IntPtr handle, int type, string json);
@@ -44,10 +44,10 @@ namespace ZKFaceId
 
         [DllImport(PathToDll)]
         private static extern int ZKHID_SnapShot(IntPtr handle, int snapType, StringBuilder snapData, out int size);
-              
+
         [DllImport(PathToDll)]
-        private static extern int ZKHID_PollMatchResult(IntPtr handle, StringBuilder json, out int len);     
-       
+        private static extern int ZKHID_PollMatchResult(IntPtr handle, StringBuilder json, out int len);
+
         [DllImport(PathToDll)]
         private static extern int ZKHID_ManageModuleData(IntPtr handle, int type, string json, StringBuilder result, out int len);
 
@@ -99,7 +99,17 @@ namespace ZKFaceId
 
         public int Close()
         {
-            return ZKHID_Close(Handle);
+            int res = -100;
+
+            try
+            {
+                res = ZKHID_Close(Handle);
+            }
+            catch (Exception)
+            {
+            }
+
+            return res;
         }
 
         public string RegisterFace(string config)
@@ -132,7 +142,7 @@ namespace ZKFaceId
 
             var res = ZKHID_PollMatchResult(Handle, json, out length);
 
-            return json.ToString() ;
+            return json.ToString();
         }
     }
 }
