@@ -23,7 +23,7 @@ namespace ZKFaceId
         {
             return ZKHID_Init();
         }
-        public int Terminate(int index)
+        public static int Terminate()
         {
             return ZKHID_Terminate();
         }

@@ -26,31 +26,34 @@ namespace AjoibotBio.MainWindow
                     {
                         try
                         {
-                            //MainViewModel.Visible = new ZKCamera(0);
-                            MainViewModel.Visible = ZKCameraLib.GetDeviceType(0) == 1? new ZKCamera(0) : new ZKCamera(1);
+                            MainViewModel.Visible = ZKCameraLib.GetDeviceType(0) == 1 ? new ZKCamera(0) : new ZKCamera(1);
                             MainViewModel.NIR = ZKCameraLib.GetDeviceType(0) == 1 ? new ZKCamera(1) : new ZKCamera(0);
 
-                            MainViewModel.Visible.InitHID();
                             MainViewModel.Visible.StartVideoStream();
                             MainViewModel.Visible.NewFrame += OnNewCameraFrame;
                             MainViewModel.Visible.NewCustomData += OnNewCustomData;
+
+                            MainViewModel.FaceRecognitionHID = new ZKHID(0);
+                            MainViewModel.FaceRecognitionHID.Start();
                         }
                         catch (Exception e)
                         {
                             Log.Fatal("Failed to initialize Face Recognition", e);
 
-                            if (MainViewModel.Visible != null)
-                            {
-                                var closeVisibleCode = MainViewModel.Visible.CloseDevice();
-                                MainViewModel.Visible = null;
-                                Log.Debug($"Visible camera closed with code {closeVisibleCode}");
-                            }
+                            MainViewModel.CloseFaceIdDevices();
 
-                            if(MainViewModel.NIR != null)
+                            if (MainViewModel.NIR != null)
                             {
-                                var closeNIRCode = MainViewModel.NIR?.CloseDevice();
+                                var closeNIRCode = MainViewModel.NIR.Close();
                                 MainViewModel.NIR = null;
                                 Log.Debug($"NIR camera closed with code {closeNIRCode}");
+                            }
+
+                            if (MainViewModel.FaceRecognitionHID != null)
+                            {
+                                var closeHIDCode = MainViewModel.FaceRecognitionHID.Close();
+                                MainViewModel.FaceRecognitionHID = null;
+                                Log.Debug($"HID device closed with code {closeHIDCode}");
                             }
                         }
                     }
@@ -82,14 +85,22 @@ namespace AjoibotBio.MainWindow
                 image.Freeze();
                 imageBase64 += BitmapFormat.BitmapToBase64(image);
             }
-            this.Dispatcher.Invoke(() =>
+
+            try
             {
-                MainWebView.ExecuteScriptAsync($"UpdateFrame('{imageBase64}')");
-            });
+                this.Dispatcher.Invoke(() =>
+                {
+                    MainWebView.ExecuteScriptAsync($"UpdateFrame('{imageBase64}')");
+                });
+            }
+            catch(Exception e)
+            {
+                Log.Error("Failed to call UpdateFrame function", e);
+            }
         }
 
         public void OnNewCustomData(object sender, CustomBioData data)
-        { 
+        {
             this.Dispatcher.Invoke(() =>
             {
                 MainWebView.ExecuteScriptAsync($"SetNewBioData({data.bioData}, {data.width}, {data.height})");

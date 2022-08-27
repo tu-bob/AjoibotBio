@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using ZKFaceId.Interface;
 using ZKFaceId.Model;
 
 namespace ZKFaceId
 {
-    public class ZKCamera
+    public class ZKCamera : ICloseable
     {
         #region C++ library import
 
@@ -40,9 +41,9 @@ namespace ZKFaceId
         private int Height { get; set; }
         private int Fps { get; set; }
 
-        private IntPtr Handle { get; set; }
+        private IntPtr Handle;
 
-        private ZKHID? HID { get; set; }
+        //private ZKHID? HID { get; set; }
 
         public ZKCamera(int index)
         {
@@ -54,13 +55,8 @@ namespace ZKFaceId
 
             Fps = 25;
 
-            var handle = IntPtr.Zero;
-            //TODO handle errors
-
-            if (OpenDevice(out handle) != 0)
+            if (OpenDevice(out Handle) != 0)
                 throw new Exception("Failed to init camera with index " + index);
-
-            Handle = handle;
         }
 
         private int OpenDevice(out IntPtr handle)
@@ -73,29 +69,9 @@ namespace ZKFaceId
             return res;
         }
 
-        public void InitHID()
+        public int Close()
         {
-            HID = new ZKHID(Index);
-
-            HID.StartDevice();
-        }
-
-
-        public int CloseDevice()
-        {
-            int res = -100;
-            try
-            {
-                HID?.Close();
-
-                res = ZKCamera_CloseDevice(Handle);
-            }
-            catch (Exception)
-            {
-            }
-
-
-            return res;
+            return ZKCamera_CloseDevice(Handle);
         }
 
         public void FreePointer(IntPtr pPointr)
@@ -135,37 +111,6 @@ namespace ZKFaceId
                 //IntPtr.Zero,
                 (IntPtr)pUserParam
                 );
-        }
-
-
-        public int? SetConfig(int type, string json)
-        {
-            var data = HID?.SetConfig(type, json);
-
-            return data;
-        }
-
-        public string RegisterFace(string config)
-        {
-            var data = HID?.RegisterFace(config);
-
-            return data;
-        }
-
-
-        public string ManageModuleData(int type, string json)
-        {
-            var res = HID?.ManageModuleData(type, json);
-
-            return res;
-        }
-
-
-        public string PollMatchResult()
-        {
-            var data = HID?.PollMatchResult();
-
-            return data;
         }
     }
 }

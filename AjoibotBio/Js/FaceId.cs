@@ -1,8 +1,5 @@
 ﻿using AjoibotBio.MainWindow;
 using System.Runtime.InteropServices;
-using System.Text.Json;
-using System.Windows;
-using ZKFaceId.Model;
 
 namespace AjoibotBio.Js
 {
@@ -10,24 +7,24 @@ namespace AjoibotBio.Js
     [ComVisible(true)]
     public class FaceId
     {
-        public string Register(string config)
+        public string? Register(string config)
         {
-           return MainViewModel.Visible?.RegisterFace(config);
+           return MainViewModel.FaceRecognitionHID?.RegisterFace(config);
         }
 
         public int? SetConfig(int type, string json)
         {
-            return MainViewModel.Visible?.SetConfig(type, json);
+            return MainViewModel.FaceRecognitionHID?.SetConfig(type, json);
         }
 
-        public string PollMatchResult()
+        public string? PollMatchResult()
         {
-            return MainViewModel.Visible?.PollMatchResult();
+            return MainViewModel.FaceRecognitionHID?.PollMatchResult();
         }
 
-        public string ManageModuleData(int type, string json)
+        public string? ManageModuleData(int type, string json)
         {
-            return MainViewModel.Visible?.ManageModuleData(type, json);
+            return MainViewModel.FaceRecognitionHID?.ManageModuleData(type, json);
         }
     }
 }

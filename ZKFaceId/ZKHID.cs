@@ -1,16 +1,13 @@
 ﻿using DemoCamApp.json;
 using log4net;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
+using ZKFaceId.Interface;
 
 namespace ZKFaceId
 {
-    public class ZKHID
+    public class ZKHID : ICloseable
     {
 
         #region C++ library import
@@ -59,10 +56,13 @@ namespace ZKFaceId
 
         private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        private bool Active { get; set; }
 
         public ZKHID(int index)
         {
             Index = index;
+
+            Active = true;
         }
         public int Init()
         {
@@ -73,16 +73,16 @@ namespace ZKFaceId
             return ZKHID_Terminate();
         }
 
-        public void StartDevice()
+        public void Start()
         {
             var initialized = Init();
             if (initialized != 0)
                 throw new Exception($"Failed to init HIDLibrary. Code {initialized}");
-            
+
             int count = 0;
             var countResult = GetCount(out count);
 
-            if(count <= 0)
+            if (count <= 0)
                 throw new Exception($"HID device not found. Code {countResult}");
 
             var open = Open();
@@ -102,26 +102,21 @@ namespace ZKFaceId
 
         public int Open()
         {
-            return ZKHID_Open(0, out Handle);
+            return ZKHID_Open(Index, out Handle);
         }
 
         public int Close()
         {
-            int res = -100;
+            Active = false;
 
-            try
-            {
-                res = ZKHID_Close(Handle);
-            }
-            catch (Exception)
-            {
-            }
-
-            return res;
+            return ZKHID_Close(Handle);
         }
 
         public string RegisterFace(string config)
         {
+            if (!Active)
+                return String.Empty;
+
             int length = 20 * 1024 * 1024;
 
             StringBuilder faceData = new StringBuilder(new String(' ', length));
@@ -133,6 +128,9 @@ namespace ZKFaceId
 
         public string ManageModuleData(int type, string json)
         {
+            if (!Active)
+                return String.Empty;
+
             int length = 20 * 1024 * 1024;
 
             StringBuilder result = new StringBuilder(new String(' ', length));
@@ -144,6 +142,9 @@ namespace ZKFaceId
 
         public string PollMatchResult()
         {
+            if (!Active)
+                return string.Empty;
+
             int length = 40 * 1024;
 
             StringBuilder json = new StringBuilder(new String(' ', length));
