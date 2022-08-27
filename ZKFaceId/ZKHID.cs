@@ -75,11 +75,13 @@ namespace ZKFaceId
 
         public void StartDevice()
         {
-            if (Init() != 0)
-                throw new Exception("Failed to init HIDLibrary");
+            var initialized = Init();
+            if (initialized != 0)
+                throw new Exception($"Failed to init HIDLibrary. Code {initialized}");
 
-            if (Open() != 0)
-                throw new Exception("Failed to open HID device");
+            var open = Open();
+            if (open != 0)
+                throw new Exception($"Failed to open HID device. Code {open}");
         }
 
         public int GetCount(out int count)
