@@ -98,11 +98,11 @@ namespace AjoibotBio
             }
 
             //Close all devices and libraries
-            MainViewModel.CloseFaceIdDevices();
+            //MainViewModel.CloseFaceIdDevices();
 
-            ZKCameraLib.Terminate();
+            //ZKCameraLib.Terminate();
 
-            ZKHIDGeneral.Terminate();
+            //ZKHIDGeneral.Terminate();
 
             foreach (var scanner in MainViewModel.ZkScanners)
             {

@@ -30,9 +30,8 @@ namespace AjoibotBio.MainWindow
         {
             try
             {
-                var closeVisibleCode = closeable.Close();
-                Visible = null;
-                Log.Debug($"{name} closed with code {closeVisibleCode}");
+                var code = closeable.Close();
+                Log.Debug($"{name} closed with code {code}");
             }
             catch(System.Exception e)
             {
@@ -43,12 +42,21 @@ namespace AjoibotBio.MainWindow
 
         public static void CloseFaceIdDevices()
         {
-            if (Visible != null)
-                CloseDevice(Visible, "Visible camera");
             if (NIR != null)
+            {
                 CloseDevice(NIR, "NIR camera");
+                NIR = null;
+            }
+            if (Visible != null)
+            {
+                CloseDevice(Visible, "Visible camera");
+                Visible = null;
+            }
             if (FaceRecognitionHID != null)
+            {
                 CloseDevice(FaceRecognitionHID, "Face recognition HID");
+                FaceRecognitionHID = null;
+            }
         }
     }
 }
