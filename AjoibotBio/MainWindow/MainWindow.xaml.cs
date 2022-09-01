@@ -13,7 +13,7 @@ namespace AjoibotBio.MainWindow
     {
         private event EventHandler MainWindowInitialized;
 
-        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        protected static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         public delegate void AppRestartedHandler();
 
@@ -32,8 +32,6 @@ namespace AjoibotBio.MainWindow
                 MainWindow.WindowHandle = new WindowInteropHelper(Application.Current.MainWindow).Handle;
                 HwndSource.FromHwnd(MainWindow.WindowHandle)?.AddHook(new HwndSourceHook(HandleMessages));
             };
-
-            MainViewModel.Uri = "https://office.kth.tj/api/bio/index.php";
 
             MainWindowInitialized += InitFaceIdCamera;
 
@@ -54,7 +52,8 @@ namespace AjoibotBio.MainWindow
             }
         }
 
-        private void ParseUri(object sender, EventArgs e) {
+        private void ParseUri(object sender, EventArgs e)
+        {
             ParseUri();
         }
 
