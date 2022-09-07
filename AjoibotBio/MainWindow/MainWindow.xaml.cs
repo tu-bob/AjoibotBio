@@ -163,6 +163,7 @@ namespace AjoibotBio.MainWindow
             Log.Debug($"Webview completed navigation to {MainViewModel.Uri}. Injecting scripts...");
             MainWebView.CoreWebView2.AddHostObjectToScript("commands", new Commands());
             MainWebView.CoreWebView2.AddHostObjectToScript("faceId", new FaceId());
+            MainWebView.CoreWebView2.AddHostObjectToScript("fingerpint", new Fingerprint());
             Log.Debug("Scripts are injected into webview");
         }
 

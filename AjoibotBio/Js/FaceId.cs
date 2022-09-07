@@ -29,5 +29,10 @@ namespace AjoibotBio.Js
         {
             return MainViewModel.Visible?.ManageModuleData(type, json);
         }
+
+        public bool IsDeviceConnected()
+        {
+            return MainViewModel.Visible != null;
+        }
     }
 }
