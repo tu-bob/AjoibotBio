@@ -96,7 +96,7 @@ namespace AjoibotBio.MainWindow
             MainWebView.Source = url;
         }
 
-        #region Accept System Message
+#region Accept System Message
         internal static void HandleParameter(string[] args)
         {
             if (Application.Current?.MainWindow is MainWindow mainWindow)
@@ -150,7 +150,7 @@ namespace AjoibotBio.MainWindow
             this.Focus();
         }
 
-        #endregion
+#endregion
 
         private void WindowSizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -160,8 +160,25 @@ namespace AjoibotBio.MainWindow
 
         private void MainWebView_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
         {
+            Log.Debug($"Webview completed navigation to {MainViewModel.Uri}. Injecting scripts...");
             MainWebView.CoreWebView2.AddHostObjectToScript("commands", new Commands());
             MainWebView.CoreWebView2.AddHostObjectToScript("faceId", new FaceId());
+            Log.Debug("Scripts are injected into webview");
+        }
+
+        private void MainWebView_CoreWebView2InitializationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2InitializationCompletedEventArgs e)
+        {
+            Log.Debug($"Core webview engine initialized");
+        }
+
+        private void MainWebView_Initialized(object sender, EventArgs e)
+        {
+            Log.Debug("Webview component initiazlied");
+        }
+
+        private void MainWebView_WebMessageReceived(object sender, Microsoft.Web.WebView2.Core.CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            Log.Debug($"Message received from web view {e.ToString}");
         }
     }
 }

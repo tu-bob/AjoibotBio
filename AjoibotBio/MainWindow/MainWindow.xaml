@@ -8,6 +8,10 @@
         mc:Ignorable="d"
         Title="Ajoibot Bio" Height="450" Width="800" Icon="/Assets/ajoibot-logo.png" SizeChanged="WindowSizeChanged">
     <Grid>
-        <wv2:WebView2 Name="MainWebView" NavigationCompleted="MainWebView_NavigationCompleted"/>
+        <wv2:WebView2 Name="MainWebView" 
+                      CoreWebView2InitializationCompleted="MainWebView_CoreWebView2InitializationCompleted"
+                      NavigationCompleted="MainWebView_NavigationCompleted"
+                      Initialized="MainWebView_Initialized"
+                      WebMessageReceived="MainWebView_WebMessageReceived"/>
     </Grid>
 </Window>
