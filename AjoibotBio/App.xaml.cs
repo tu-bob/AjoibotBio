@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using System.Windows.Threading;
 using ZKFaceId;
 
 namespace AjoibotBio
@@ -18,6 +19,8 @@ namespace AjoibotBio
     public partial class App : Application
     {
         private static readonly ILog log = LogManager.GetLogger(typeof(App));
+
+        private static readonly ILog Log = LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         Mutex mutex;
 
@@ -77,7 +80,10 @@ namespace AjoibotBio
             this.Shutdown();
         }
 
-
+        void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            Log.Error("Fatal error: " + e.ToString());
+        }
 
         private void Application_Exit(object sender, ExitEventArgs e)
         {
