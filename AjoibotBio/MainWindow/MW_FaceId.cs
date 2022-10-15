@@ -1,5 +1,4 @@
-﻿using AjoibotBio.Js;
-using AjoibotBio.Utils;
+﻿using AjoibotBio.Utils;
 using System;
 using System.IO;
 using System.Threading.Tasks;

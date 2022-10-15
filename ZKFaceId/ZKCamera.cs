@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using ZKFaceId.Interface;
 using ZKFaceId.Model;
 
@@ -43,7 +46,11 @@ namespace ZKFaceId
 
         private IntPtr Handle;
 
-        //private ZKHID? HID { get; set; }
+        private Stack<byte[]> videoFrames;
+
+        private object videoLock;
+
+        private bool Active { get; set; }
 
         public ZKCamera(int index)
         {
@@ -54,6 +61,8 @@ namespace ZKFaceId
             Height = 1280;
 
             Fps = 25;
+
+            videoFrames = new Stack<byte[]>();
 
             if (OpenDevice(out Handle) != 0)
                 throw new Exception("Failed to init camera with index " + index);
@@ -66,11 +75,14 @@ namespace ZKFaceId
             if (res != 0)
                 throw new Exception("Failed to open device with index: " + Index);
 
+            Active = true;
+
             return res;
         }
 
         public int Close()
         {
+            Active = false;
             return ZKCamera_CloseDevice(Handle);
         }
 
@@ -84,8 +96,9 @@ namespace ZKFaceId
             var frame = new byte[data.data_length];
             Marshal.Copy(data.data, frame, 0, (int)data.data_length);
             FreePointer(data.data);
-            EventHandler<byte[]> handler = NewFrame;
-            if (handler != null) handler(this, frame);
+            videoFrames.Push(frame);
+            //EventHandler<byte[]> handler = NewFrame;
+            //if (handler != null) handler(this, frame);
 
         }
 
@@ -111,6 +124,23 @@ namespace ZKFaceId
                 //IntPtr.Zero,
                 (IntPtr)pUserParam
                 );
+
+            Task.Run(() => StreamVideo());
+        }
+
+        private void StreamVideo()
+        {
+            while (Active)
+            {
+                Thread.Sleep(20);
+
+                if(videoFrames.Count > 0)
+                {
+                    var frame = videoFrames.Pop();
+                    EventHandler<byte[]> handler = NewFrame;
+                    if (handler != null) handler(this, frame);
+                }
+            }
         }
     }
 }
