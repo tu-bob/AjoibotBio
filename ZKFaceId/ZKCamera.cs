@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 using ZKFaceId.Interface;
 using ZKFaceId.Model;
 
@@ -11,7 +10,7 @@ namespace ZKFaceId
     public class ZKCamera : ICloseable
     {
         #region C++ library import
-
+        
         private const string PathToDll = "lib/x86/ZKCameraLib.dll";
 
         [DllImport(PathToDll)]
@@ -46,9 +45,7 @@ namespace ZKFaceId
 
         private IntPtr Handle;
 
-        private Stack<byte[]> videoFrames;
-
-        private object videoLock;
+        private Queue<byte[]> videoFrames;
 
         private bool Active { get; set; }
 
@@ -62,7 +59,7 @@ namespace ZKFaceId
 
             Fps = 25;
 
-            videoFrames = new Stack<byte[]>();
+            videoFrames = new Queue<byte[]>();
 
             if (OpenDevice(out Handle) != 0)
                 throw new Exception("Failed to init camera with index " + index);
@@ -83,6 +80,7 @@ namespace ZKFaceId
         public int Close()
         {
             Active = false;
+            Thread.Sleep(200);
             return ZKCamera_CloseDevice(Handle);
         }
 
@@ -93,13 +91,13 @@ namespace ZKFaceId
 
         public void OnGetVideoData(IntPtr pUserParam, VideoData data)
         {
-            var frame = new byte[data.data_length];
-            Marshal.Copy(data.data, frame, 0, (int)data.data_length);
-            FreePointer(data.data);
-            videoFrames.Push(frame);
-            //EventHandler<byte[]> handler = NewFrame;
-            //if (handler != null) handler(this, frame);
+                var frame = new byte[data.data_length];
+                Marshal.Copy(data.data, frame, 0, (int)data.data_length);
+                FreePointer(data.data);
+                videoFrames.Enqueue(frame);
 
+                if (videoFrames.Count > 5)
+                    videoFrames.Dequeue();
         }
 
         //Throws error with x86 lib
@@ -125,7 +123,8 @@ namespace ZKFaceId
                 (IntPtr)pUserParam
                 );
 
-            Task.Run(() => StreamVideo());
+            var thread = new Thread(StreamVideo);
+            thread.Start();
         }
 
         private void StreamVideo()
@@ -134,9 +133,9 @@ namespace ZKFaceId
             {
                 Thread.Sleep(20);
 
-                if(videoFrames.Count > 0)
+                if (videoFrames.Count > 0)
                 {
-                    var frame = videoFrames.Pop();
+                    var frame = videoFrames.Dequeue();
                     EventHandler<byte[]> handler = NewFrame;
                     if (handler != null) handler(this, frame);
                 }
