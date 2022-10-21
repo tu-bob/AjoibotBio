@@ -7,7 +7,7 @@
         xmlns:local="clr-namespace:AjoibotBio"
         mc:Ignorable="d"
         Title="Ajoibot Bio" Height="450" Width="800" Icon="/Assets/ajoibot-logo.png" SizeChanged="WindowSizeChanged">
-    <Grid>
+    <Grid KeyDown="Grid_KeyDown">
         <wv2:WebView2 Name="MainWebView" NavigationCompleted="MainWebView_NavigationCompleted"/>
     </Grid>
 </Window>

@@ -162,5 +162,14 @@ namespace AjoibotBio.MainWindow
             MainWebView.CoreWebView2.AddHostObjectToScript("commands", new Commands());
             MainWebView.CoreWebView2.AddHostObjectToScript("faceId", new FaceId());
         }
+
+        private void Grid_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if(e.Key == System.Windows.Input.Key.F11)
+            {
+                WindowState = this.WindowState == WindowState.Normal ? WindowState.Maximized : WindowState.Normal;
+                WindowStyle = this.WindowState == WindowState.Normal ? WindowStyle.None : WindowStyle.SingleBorderWindow;
+            }
+        }
     }
 }
