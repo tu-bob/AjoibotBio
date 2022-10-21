@@ -26,7 +26,7 @@ namespace AjoibotBio.MainWindow
                         try
                         {
                             MainViewModel.Visible = ZKCameraLib.GetDeviceType(0) == 1 ? new ZKCamera(0) : new ZKCamera(1);
-                            MainViewModel.NIR = ZKCameraLib.GetDeviceType(0) == 1 ? new ZKCamera(1) : new ZKCamera(0);
+                            //MainViewModel.NIR = ZKCameraLib.GetDeviceType(0) == 1 ? new ZKCamera(1) : new ZKCamera(0);
 
                             MainViewModel.Visible.StartVideoStream();
                             MainViewModel.Visible.NewFrame += OnNewCameraFrame;
