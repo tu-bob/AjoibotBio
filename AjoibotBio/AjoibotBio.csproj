@@ -12,8 +12,8 @@
   <ItemGroup>
     <None Remove="Assets\ajoibot-logo.png" />
     <None Remove="Assets\ReadMe.txt" />
+    <None Remove="Assets\release reg edit.reg" />
     <None Remove="Assets\zkdriver.exe" />
-    <None Remove="Assets\установка релиз.reg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,7 +23,7 @@
     <Content Include="Assets\zkdriver.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\установка релиз.reg">
+    <Content Include="Assets\release reg edit.reg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
