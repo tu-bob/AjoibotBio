@@ -181,5 +181,26 @@ namespace AjoibotBio.MainWindow
         {
             Log.Debug($"Message received from web view {e.ToString}");
         }
+
+        private void Grid_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if(e.Key == System.Windows.Input.Key.F11)
+            {
+                ToogleFullScreen();
+            } 
+        }
+
+        private void ToogleFullScreen()
+        {
+            if(this.WindowState == WindowState.Maximized)
+            {
+                this.WindowState = WindowState.Normal;
+                this.WindowStyle = WindowStyle.SingleBorderWindow;
+            } else
+            {
+                this.WindowState = WindowState.Maximized;
+                this.WindowStyle = WindowStyle.None;
+            }
+        }
     }
 }
