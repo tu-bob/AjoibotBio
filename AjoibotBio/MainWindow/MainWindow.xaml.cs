@@ -82,7 +82,7 @@ namespace AjoibotBio.MainWindow
             Log.Debug($"Navigating to url: {MainViewModel.Uri}");
             if (string.IsNullOrEmpty(MainViewModel.Uri))
             {
-                this.printInMaivWebView("<h2 style='color:red'>Url was not provided<h2>");
+                this.printInMainWebView("<h2 style='color:red'>Url was not provided<h2>");
             }
             else
             {
@@ -90,7 +90,7 @@ namespace AjoibotBio.MainWindow
             }
         }
 
-        private void printInMaivWebView(string message)
+        private void printInMainWebView(string message)
         {
             var url = new Uri("data:text/html," + message);
             MainWebView.Source = url;
@@ -170,6 +170,10 @@ namespace AjoibotBio.MainWindow
         private void MainWebView_CoreWebView2InitializationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2InitializationCompletedEventArgs e)
         {
             Log.Debug($"Core webview engine initialized");
+
+            MainWebView.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = false;
+            MainWebView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
+            MainWebView.CoreWebView2.Settings.AreDevToolsEnabled = false;
         }
 
         private void MainWebView_Initialized(object sender, EventArgs e)
