@@ -17,6 +17,7 @@
                       CoreWebView2InitializationCompleted="MainWebView_CoreWebView2InitializationCompleted"
                       NavigationCompleted="MainWebView_NavigationCompleted"
                       Initialized="MainWebView_Initialized"
+                      Loaded="MainWebView_Loaded"
                       WebMessageReceived="MainWebView_WebMessageReceived"/>
     </Grid>
 </Window>

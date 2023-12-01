@@ -2,6 +2,7 @@
 using AjoibotBio.Properties;
 using AjoibotBio.Utils;
 using log4net;
+using Microsoft.Web.WebView2.Core;
 using System;
 using System.Web;
 using System.Windows;
@@ -205,6 +206,21 @@ namespace AjoibotBio.MainWindow
                 this.WindowState = WindowState.Maximized;
                 this.WindowStyle = WindowStyle.None;
             }
+        }
+
+        private async void MainWebView_Loaded(object sender, RoutedEventArgs e)
+        {
+            await MainWebView.EnsureCoreWebView2Async();
+            MainWebView.CoreWebView2.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
+            MainWebView.CoreWebView2.WebResourceRequested += OnWebResourceRequested;
+        }
+
+        private void OnWebResourceRequested(object sender, CoreWebView2WebResourceRequestedEventArgs e)
+        {
+            var request = e.Request;
+            var headers = request.Headers;
+
+            headers.SetHeader("HTTP_AJOIBOT_APP_VERSION", "1.0");
         }
     }
 }
