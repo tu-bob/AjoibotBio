@@ -38,6 +38,8 @@ namespace AjoibotBio.MainWindow
 #endif
             MainWindowInitialized += InitFaceIdCamera;
 
+            MainWindowInitialized += RestoreWindowSize;
+
             MainWindowInitialized += InitFingerprintScanner;
 
             MainWindowInitialized += ParseUri;
@@ -78,6 +80,25 @@ namespace AjoibotBio.MainWindow
                 NavigateToUri();
         }
 
+        private void RestoreWindowSize(object sender, EventArgs e)
+        {
+            var settings = new Settings();
+            
+            MainViewModel.IsFullscreen = settings.IsFullScreen;
+            MainViewModel.WindowHeight = settings.WindowHeight;
+            MainViewModel.WindowWidth = settings.WindowWidth;
+
+            if (MainViewModel.IsFullscreen)
+            {
+                this.WindowState = WindowState.Maximized;
+                this.WindowStyle = WindowStyle.None;
+            } else if (MainViewModel.WindowHeight > 0 && MainViewModel.WindowWidth > 0)
+            {
+                this.Height = MainViewModel.WindowHeight;
+                this.Width = MainViewModel.WindowWidth;
+            }
+        }
+
         private void ToogleFullScreen()
         {
             if (this.WindowState == WindowState.Maximized)
@@ -90,6 +111,8 @@ namespace AjoibotBio.MainWindow
                 this.WindowState = WindowState.Maximized;
                 this.WindowStyle = WindowStyle.None;
             }
+
+            MainViewModel.IsFullscreen = !MainViewModel.IsFullscreen;
         }
 
         #region Accept System Message
@@ -150,8 +173,8 @@ namespace AjoibotBio.MainWindow
 
         private void WindowSizeChanged(object sender, SizeChangedEventArgs e)
         {
-            MainViewModel.WindowsHeight = e.NewSize.Height;
-            MainViewModel.WindowsWidth = e.NewSize.Width;
+            MainViewModel.WindowHeight = e.NewSize.Height;
+            MainViewModel.WindowWidth = e.NewSize.Width;
         }
 
         private void Grid_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)

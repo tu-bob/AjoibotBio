@@ -96,9 +96,9 @@ namespace AjoibotBio
                 var settings = new Settings
                 {
                     LastUri = MainViewModel.Uri,
-                    FullScreen = MainViewModel.IsFullscreen,
-                    WindowsWidth = MainViewModel.WindowsWidth,
-                    WindowsHeight = MainViewModel.WindowsHeight
+                    IsFullScreen = MainViewModel.IsFullscreen,
+                    WindowWidth = MainViewModel.WindowWidth,
+                    WindowHeight = MainViewModel.WindowHeight
                 };
                 settings.Save();
             }

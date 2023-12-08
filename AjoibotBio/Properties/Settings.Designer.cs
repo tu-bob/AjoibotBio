@@ -12,7 +12,7 @@ namespace AjoibotBio.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.2.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.8.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -38,36 +38,36 @@ namespace AjoibotBio.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double WindowsWidth {
+        public double WindowWidth {
             get {
-                return ((double)(this["WindowsWidth"]));
+                return ((double)(this["WindowWidth"]));
             }
             set {
-                this["WindowsWidth"] = value;
+                this["WindowWidth"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public double WindowsHeight {
+        public double WindowHeight {
             get {
-                return ((double)(this["WindowsHeight"]));
+                return ((double)(this["WindowHeight"]));
             }
             set {
-                this["WindowsHeight"] = value;
+                this["WindowHeight"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool FullScreen {
+        public bool IsFullScreen {
             get {
-                return ((bool)(this["FullScreen"]));
+                return ((bool)(this["IsFullScreen"]));
             }
             set {
-                this["FullScreen"] = value;
+                this["IsFullScreen"] = value;
             }
         }
     }
