@@ -78,26 +78,21 @@ namespace AjoibotBio.MainWindow
                 NavigateToUri();
         }
 
-        private void NavigateToUri()
+        private void ToogleFullScreen()
         {
-            Log.Debug($"Navigating to url: {MainViewModel.Uri}");
-            if (string.IsNullOrEmpty(MainViewModel.Uri))
+            if (this.WindowState == WindowState.Maximized)
             {
-                this.printInMainWebView("<h2 style='color:red'>Url was not provided<h2>");
+                this.WindowState = WindowState.Normal;
+                this.WindowStyle = WindowStyle.SingleBorderWindow;
             }
             else
             {
-                MainWebView.Source = new Uri(MainViewModel.Uri);
+                this.WindowState = WindowState.Maximized;
+                this.WindowStyle = WindowStyle.None;
             }
         }
 
-        private void printInMainWebView(string message)
-        {
-            var url = new Uri("data:text/html," + message);
-            MainWebView.Source = url;
-        }
-
-#region Accept System Message
+        #region Accept System Message
         internal static void HandleParameter(string[] args)
         {
             if (Application.Current?.MainWindow is MainWindow mainWindow)
@@ -151,13 +146,28 @@ namespace AjoibotBio.MainWindow
             this.Focus();
         }
 
-#endregion
+        #endregion
 
         private void WindowSizeChanged(object sender, SizeChangedEventArgs e)
         {
             MainViewModel.WindowsHeight = e.NewSize.Height;
             MainViewModel.WindowsWidth = e.NewSize.Width;
         }
+
+        private void Grid_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.F11)
+            {
+                ToogleFullScreen();
+            }
+
+            if (e.Key == System.Windows.Input.Key.F5)
+            {
+                MainWebView.Reload();
+            }
+        }
+
+        #region WebView
 
         private void MainWebView_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
         {
@@ -187,32 +197,6 @@ namespace AjoibotBio.MainWindow
             Log.Debug($"Message received from web view {e.ToString}");
         }
 
-        private void Grid_KeyUp(object sender, System.Windows.Input.KeyEventArgs e)
-        {
-            if(e.Key == System.Windows.Input.Key.F11)
-            {
-                ToogleFullScreen();
-            } 
-
-            if(e.Key == System.Windows.Input.Key.F5)
-            {
-                MainWebView.Reload();
-            }
-        }
-
-        private void ToogleFullScreen()
-        {
-            if(this.WindowState == WindowState.Maximized)
-            {
-                this.WindowState = WindowState.Normal;
-                this.WindowStyle = WindowStyle.SingleBorderWindow;
-            } else
-            {
-                this.WindowState = WindowState.Maximized;
-                this.WindowStyle = WindowStyle.None;
-            }
-        }
-
         private async void MainWebView_Loaded(object sender, RoutedEventArgs e)
         {
             await MainWebView.EnsureCoreWebView2Async();
@@ -227,5 +211,26 @@ namespace AjoibotBio.MainWindow
 
             headers.SetHeader("HTTP_AJOIBOT_APP_VERSION", "1.0");
         }
+
+
+        private void printInMainWebView(string message)
+        {
+            var url = new Uri("data:text/html," + message);
+            MainWebView.Source = url;
+        }
+
+        private void NavigateToUri()
+        {
+            Log.Debug($"Navigating to url: {MainViewModel.Uri}");
+            if (string.IsNullOrEmpty(MainViewModel.Uri))
+            {
+                this.printInMainWebView("<h2 style='color:red'>Url was not provided<h2>");
+            }
+            else
+            {
+                MainWebView.Source = new Uri(MainViewModel.Uri);
+            }
+        }
+        #endregion
     }
 }
