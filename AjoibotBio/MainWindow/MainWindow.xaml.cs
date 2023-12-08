@@ -34,7 +34,7 @@ namespace AjoibotBio.MainWindow
                 HwndSource.FromHwnd(MainWindow.WindowHandle)?.AddHook(new HwndSourceHook(HandleMessages));
             };
 #if DEBUG
-            //MainViewModel.Uri = "https://office.kth.tj/api/bio/registration.php?0&5473&792e76dee67d778158f2f6a90dff03f2&1";
+            MainViewModel.Uri = "https://office.kth.tj/api/bio/registration.php?0&5473&792e76dee67d778158f2f6a90dff03f2&1";
 #endif
             MainWindowInitialized += InitFaceIdCamera;
 
