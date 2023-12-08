@@ -58,6 +58,16 @@ namespace AjoibotBio
                 {
                     MainViewModel.Uri = "http://" + line.Split(':')[1];
                 }
+                else {
+                    var settings = new Settings();
+                    MainViewModel.Uri = settings.LastUri;
+                }
+
+                if(MainViewModel.Uri == null)
+                {
+                    log.Error("URL is not provided");
+                    this.Shutdown();
+                }
 
                 return;
             }
