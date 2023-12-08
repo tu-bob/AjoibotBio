@@ -169,22 +169,42 @@ namespace AjoibotBio.MainWindow
 
         #region WebView
 
-        private void MainWebView_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
+        private async void MainWebView_NavigationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
         {
             Log.Debug($"Webview completed navigation to {MainViewModel.Uri}. Injecting scripts...");
             MainWebView.CoreWebView2.AddHostObjectToScript("commands", new Commands());
             MainWebView.CoreWebView2.AddHostObjectToScript("faceId", new FaceId());
             MainWebView.CoreWebView2.AddHostObjectToScript("fingerpint", new Fingerprint());
+
+            // Inject JavaScript to disable copy and paste
+            string jsCode = @"
+                    document.addEventListener('keydown', function(e) {
+                        if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.key === 'v' || e.key === 'V')) {
+                            e.preventDefault();
+                        }
+                    });
+                ";
+
+            await MainWebView.CoreWebView2.ExecuteScriptAsync(jsCode);
             Log.Debug("Scripts are injected into webview");
         }
 
-        private void MainWebView_CoreWebView2InitializationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2InitializationCompletedEventArgs e)
+        private async void MainWebView_CoreWebView2InitializationCompleted(object sender, Microsoft.Web.WebView2.Core.CoreWebView2InitializationCompletedEventArgs e)
         {
-            Log.Debug($"Core webview engine initialized");
+            if (e.IsSuccess)
+            {
+                Log.Debug($"Core webview engine initialized");
 
-            MainWebView.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = false;
-            MainWebView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
-            MainWebView.CoreWebView2.Settings.AreDevToolsEnabled = false;
+                await MainWebView.EnsureCoreWebView2Async();
+
+                MainWebView.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = false;
+                MainWebView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
+                MainWebView.CoreWebView2.Settings.AreDevToolsEnabled = false;
+            }
+            else
+            {
+                Log.Debug($"Failed to inititalize webview engine");
+            }
         }
 
         private void MainWebView_Initialized(object sender, EventArgs e)
