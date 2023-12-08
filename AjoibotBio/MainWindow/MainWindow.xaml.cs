@@ -193,6 +193,11 @@ namespace AjoibotBio.MainWindow
             {
                 ToogleFullScreen();
             } 
+
+            if(e.Key == System.Windows.Input.Key.F5)
+            {
+                MainWebView.Reload();
+            }
         }
 
         private void ToogleFullScreen()
