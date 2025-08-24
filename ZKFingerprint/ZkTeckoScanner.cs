@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using log4net;
@@ -39,13 +40,11 @@ namespace ZKFingerprint
 
         private byte[] FpBuffer { get; set; }
 
-        //AEngine
-        //private string PrintTmp { get; set; }
-        //private int PointsTmp { get; set; }
         public int DeviceIndex { get; set; }
 
         private volatile bool _isScanningOn = false;
-        private int _acquireFailCount = 0;
+        private Task? _captureTask = null;
+        private readonly object _captureLock = new();
 
         #endregion
 
@@ -63,7 +62,7 @@ namespace ZKFingerprint
             {
                 if (DevHandle != IntPtr.Zero)
                 {
-                    Log.Info($"Device already open (index={DeviceIndex}, handle={DevHandle}).");
+                    Log.Debug($"Device already open (index={DeviceIndex}, handle={DevHandle}).");
                     return true;
                 }
                 Log.Info($"Attempting to open fingerprint device at index {DeviceIndex}...");
@@ -91,6 +90,36 @@ namespace ZKFingerprint
                 {
                     Log.Info($"DisconnectDevice: stopping capture loop (index={DeviceIndex}).");
                     _isScanningOn = false;
+                }
+                // Wait for capture task to finish
+                Task? taskToWait = null;
+                lock (_captureLock)
+                {
+                    taskToWait = _captureTask;
+                }
+                if (taskToWait != null)
+                {
+                    try
+                    {
+                        if (!taskToWait.Wait(50))
+                        {
+                            Log.Warn($"DisconnectDevice: capture task did not finish within timeout (index={DeviceIndex}).");
+                        }
+                    }
+                    catch (Exception exWait)
+                    {
+                        Log.Warn("DisconnectDevice: exception while waiting for capture task.", exWait);
+                    }
+                    finally
+                    {
+                        lock (_captureLock)
+                        {
+                            if (_captureTask == taskToWait && taskToWait.IsCompleted)
+                            {
+                                _captureTask = null;
+                            }
+                        }
+                    }
                 }
 
                 Log.Info($"Disconnecting fingerprint device (index={DeviceIndex}, handle={DevHandle})...");
@@ -131,6 +160,20 @@ namespace ZKFingerprint
         /// <summary>
         /// Acquire finger print image and print template CapTmp
         /// </summary>
+        public void StartCapture()
+        {
+            lock (_captureLock)
+            {
+                if (_captureTask != null && !_captureTask.IsCompleted)
+                {
+                    Log.Info($"StartCapture ignored: capture already running (index={DeviceIndex}).");
+                    return;
+                }
+                _captureTask = Task.Run(() => CapturePrint());
+                Log.Info($"StartCapture: capture task started (index={DeviceIndex}).");
+            }
+        }
+
         public void CapturePrint()
         {
             try
@@ -219,8 +262,9 @@ namespace ZKFingerprint
                     Log.Warn("Exception while freeing DB handle.", ex);
                 }
 
-                // Close device on exit of capture logic
-                DisconnectDevice();
+                // Do not close device here to avoid recursion with DisconnectDevice.
+                // Device will be closed by explicit DisconnectDevice() which also joins the capture task.
+                _isScanningOn = false;
             }
         }
 

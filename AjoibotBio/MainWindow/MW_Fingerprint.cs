@@ -31,7 +31,7 @@ namespace AjoibotBio.MainWindow
                         var index = i;
                         Task.Factory.StartNew(state =>
                         {
-                            Log.Info($"Start capture for  fingerprint scanner with index of {i}");
+                            Log.Info($"Start capture for  fingerprint scanner with index of {index}");
                             DoCapture(index);
                         }, $"Thread{index}");
                     }
@@ -67,7 +67,7 @@ namespace AjoibotBio.MainWindow
                 MainViewModel.ZkScanners.Remove(scanner);
             };
 
-            scanner.CapturePrint();
+            scanner.StartCapture();
         }
 
         private void AjoibotFingerInvoke(int index, string image, string print)
