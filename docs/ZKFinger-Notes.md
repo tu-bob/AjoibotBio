@@ -19,7 +19,20 @@ How we apply it in code
 - Per capture: int templateSize = MaxTemplateSize; AcquireFingerprint(..., CapTmp, ref templateSize)
 - Encode: Convert.ToBase64String(CapTmp, 0, templateSize)
 
+LED and buzzer control (SetParameters)
+
+- The SDK uses parameter codes for device indicators and buzzer:
+  - 101 = LED1 (often White or Blue depending on model)
+  - 102 = Green LED
+  - 103 = Red LED
+  - 104 = Buzzer/Sound
+- To control them, call zkfp2.SetParameters(handle, code, valueBytes, 4) where value is:
+  - 1 = ON
+  - 0 = OFF
+- Our code defines constants for these values and iterates over them to reset signals during disconnect.
+
 Notes
 
 - Different ZK templates (e.g., 256/512/1024/2048) may appear depending on device model and algorithms; 2048 is a safe upper bound per SDK guide.
 - If you change SDK version or device, verify the documented maximum template size and update MaxTemplateSize accordingly.
+- LED1 color label may vary by device (White vs Blue), but the code values remain consistent.

@@ -20,6 +20,15 @@ namespace ZKFingerprint
         // We define a named constant to avoid using a magic number and to document the rationale.
         private const int MaxTemplateSize = 2048;
 
+        // ZKFinger SDK SetParameters codes for indicators/buzzer (model-dependent LED color labels):
+        // 101 = LED1 (often White/Blue), 102 = Green, 103 = Red, 104 = Buzzer/Sound.
+        // Value 1 turns ON, value 0 turns OFF.
+        private const int SignalWhiteOrBlue = 101;
+        private const int SignalGreen = 102;
+        private const int SignalRed = 103;
+        private const int SignalBeep = 104;
+        private static readonly int[] AllSignalCodes = new[] { SignalWhiteOrBlue, SignalGreen, SignalRed, SignalBeep };
+
         private IntPtr DevHandle = IntPtr.Zero;
         private IntPtr DBHandle = IntPtr.Zero;
         private int mfpWidth = 300; //288
@@ -35,7 +44,7 @@ namespace ZKFingerprint
         //private int PointsTmp { get; set; }
         public int DeviceIndex { get; set; }
 
-        private readonly bool IsScanningOn = true;
+        private volatile bool _isScanningOn = false;
         private int _acquireFailCount = 0;
 
         #endregion
@@ -72,11 +81,22 @@ namespace ZKFingerprint
         {
             try
             {
-                Log.Info($"Disconnecting fingerprint device (index={DeviceIndex}, handle={DevHandle})...");
-                // Turn off all signals
-                for (int i = 101; i < 105; i++)
+                // Ensure capture loop stops before attempting to close the device
+                if (_isScanningOn)
                 {
-                    int code = i;
+                    Log.Info($"DisconnectDevice: stopping capture loop (index={DeviceIndex}).");
+                    _isScanningOn = false;
+                }
+
+                Log.Info($"Disconnecting fingerprint device (index={DeviceIndex}, handle={DevHandle})...");
+                if (DevHandle == IntPtr.Zero)
+                {
+                    Log.Warn("DisconnectDevice called but device handle is zero. Nothing to close.");
+                    return true;
+                }
+                // Turn off all signals
+                foreach (var code in AllSignalCodes)
+                {
                     byte[] turnOff = new byte[4];
                     zkfp2.Int2ByteArray(0, turnOff);
                     var ret = zkfp2.SetParameters(DevHandle, code, turnOff, 4);
@@ -137,7 +157,8 @@ namespace ZKFingerprint
 
                     Log.Info($"Fingerprint capture parameters: width={mfpWidth} (ret={ret1}), height={mfpHeight} (ret={ret2}), cbCapTmp={cbCapTmp}.");
 
-                    while (IsScanningOn)
+                    _isScanningOn = true;
+                    while (_isScanningOn)
                     {
                         FpBuffer = new byte[mfpWidth * mfpHeight];
                         // Reset template size before each capture to the maximum buffer size. The SDK will update
@@ -173,6 +194,20 @@ namespace ZKFingerprint
                             {
                                 Log.Debug($"AcquireFingerprint returned {ret} (index={DeviceIndex}), failCount={_acquireFailCount}.");
                             }
+                            if (_acquireFailCount >= 200)
+                            {
+                                Log.Error($"AcquireFingerprint failed {_acquireFailCount} times consecutively. Assuming device disconnected (index={DeviceIndex}). Raising DeviceDisconnected and stopping capture.");
+                                try
+                                {
+                                    Application.Current?.Dispatcher?.Invoke(() => DeviceDisconnected?.Invoke());
+                                }
+                                catch (Exception exInvoke)
+                                {
+                                    Log.Warn("Exception while invoking DeviceDisconnected event.", exInvoke);
+                                }
+                                _isScanningOn = false;
+                                break;
+                            }
                         }
                         Thread.Sleep(50);
                     }
@@ -207,6 +242,19 @@ namespace ZKFingerprint
             }
         }
 
+        public void StopCapture()
+        {
+            try
+            {
+                Log.Info($"StopCapture requested (index={DeviceIndex}).");
+                _isScanningOn = false;
+            }
+            catch (Exception ex)
+            {
+                Log.Warn("Exception while stopping capture.", ex);
+            }
+        }
+
         /// <summary>
         /// Alert signal with preset duration
         /// </summary>
@@ -220,10 +268,9 @@ namespace ZKFingerprint
 
         private void ResetSignals()
         {
-            Log.Debug("ResetSignals: turning off codes 101..104.");
-            for (int i = 101; i < 105; i++)
+            Log.Debug("ResetSignals: turning off indicator and buzzer signals.");
+            foreach (var code in AllSignalCodes)
             {
-                int code = i;
                 SignalOff(code);
             }
         }
