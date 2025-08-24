@@ -14,12 +14,18 @@ namespace ZKFingerprint
 
         #region Parameters
 
+        // According to ZKFinger SDK (see ZKFingerprint\Lib\"ZKFinger Reader SDK C#_en_V2.pdf"),
+        // the fingerprint template buffer should be at least 2048 bytes. The SDK writes the template
+        // into this buffer and returns the actual length via the ref size parameter of AcquireFingerprint.
+        // We define a named constant to avoid using a magic number and to document the rationale.
+        private const int MaxTemplateSize = 2048;
+
         private IntPtr DevHandle = IntPtr.Zero;
         private IntPtr DBHandle = IntPtr.Zero;
         private int mfpWidth = 300; //288
         private int mfpHeight = 300; //369
-        private int cbCapTmp = 2048;
-        private readonly byte[] CapTmp = new byte[2048];
+        private int cbCapTmp = MaxTemplateSize;
+        private readonly byte[] CapTmp = new byte[MaxTemplateSize];
         private readonly int SignalDuration = 1000;
 
         private byte[] FpBuffer { get; set; }
@@ -87,6 +93,7 @@ namespace ZKFingerprint
                 {
                     Log.Error($"Failed to close fingerprint device (index={DeviceIndex}). CloseDevice returned {closeRet}.");
                 }
+                DevHandle = IntPtr.Zero;
                 return success;
             }
             catch (Exception ex)
@@ -133,9 +140,13 @@ namespace ZKFingerprint
                     while (IsScanningOn)
                     {
                         FpBuffer = new byte[mfpWidth * mfpHeight];
-                        int ret = zkfp2.AcquireFingerprint(DevHandle, FpBuffer, CapTmp, ref cbCapTmp);
+                        // Reset template size before each capture to the maximum buffer size. The SDK will update
+                        // templateSize with the actual number of bytes written.
+                        int templateSize = MaxTemplateSize;
+                        int ret = zkfp2.AcquireFingerprint(DevHandle, FpBuffer, CapTmp, ref templateSize);
                         if (ret == zkfp.ZKFP_ERR_OK)
                         {
+                            _acquireFailCount = 0; // reset on success
                             var image = new BitmapImage();
                             var mem = new MemoryStream();
                             BitmapFormat.GetBitmap(FpBuffer, mfpWidth, mfpHeight, ref mem);
@@ -150,9 +161,18 @@ namespace ZKFingerprint
                             mem.Flush();
                             mem.Dispose();
                             var imageBase64 = BitmapFormat.BitmapToBase64(image);
-                            var fingerPrint = Convert.ToBase64String(CapTmp);
-                            Log.Info($"Fingerprint acquired successfully (index={DeviceIndex}, imageSize={imageBase64?.Length ?? 0}, templateSize={cbCapTmp}).");
+                            // Use the actual template size returned by the SDK
+                            var fingerPrint = Convert.ToBase64String(CapTmp, 0, templateSize);
+                            Log.Info($"Fingerprint acquired successfully (index={DeviceIndex}, imageSize={imageBase64?.Length ?? 0}, templateSize={templateSize}).");
                             Application.Current.Dispatcher.Invoke(() => FingerPrintCaptured?.Invoke(DeviceIndex, imageBase64, fingerPrint));
+                        }
+                        else
+                        {
+                            _acquireFailCount++;
+                            if (_acquireFailCount % 20 == 1) // throttle logs to avoid flooding
+                            {
+                                Log.Debug($"AcquireFingerprint returned {ret} (index={DeviceIndex}), failCount={_acquireFailCount}.");
+                            }
                         }
                         Thread.Sleep(50);
                     }
@@ -168,7 +188,21 @@ namespace ZKFingerprint
             }
             finally
             {
-                // Optionally close on exit of capture logic
+                // Free DB handle if initialized
+                try
+                {
+                    if (DBHandle != IntPtr.Zero)
+                    {
+                        zkfp2.DBFree(DBHandle);
+                        DBHandle = IntPtr.Zero;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Warn("Exception while freeing DB handle.", ex);
+                }
+
+                // Close device on exit of capture logic
                 DisconnectDevice();
             }
         }
@@ -202,6 +236,11 @@ namespace ZKFingerprint
         {
             try
             {
+                if (DevHandle == IntPtr.Zero)
+                {
+                    Log.Warn($"SignalOn ignored: device handle is zero (code={code}).");
+                    return;
+                }
                 byte[] turnOn = new byte[4];
                 zkfp2.Int2ByteArray(1, turnOn);
                 var ret = zkfp2.SetParameters(DevHandle, code, turnOn, 4);
@@ -217,6 +256,11 @@ namespace ZKFingerprint
         {
             try
             {
+                if (DevHandle == IntPtr.Zero)
+                {
+                    Log.Warn($"SignalOff ignored: device handle is zero (code={code}).");
+                    return;
+                }
                 byte[] turnOff = new byte[4];
                 zkfp2.Int2ByteArray(0, turnOff);
                 var ret = zkfp2.SetParameters(DevHandle, code, turnOff, 4);
