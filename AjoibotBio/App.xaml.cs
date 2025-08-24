@@ -1,7 +1,6 @@
 ﻿using AjoibotBio.MainWindow;
 using AjoibotBio.Properties;
 using AjoibotBio.Utils;
-using libzkfpcsharp;
 using log4net;
 using System;
 using System.Diagnostics;
@@ -9,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using ZKFaceId;
+using ZKFingerprint;
 
 namespace AjoibotBio
 {
@@ -29,7 +29,8 @@ namespace AjoibotBio
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            log4net.Config.XmlConfigurator.Configure();
+            var logRepository = LogManager.GetRepository(System.Reflection.Assembly.GetEntryAssembly());
+            log4net.Config.XmlConfigurator.Configure(logRepository, new System.IO.FileInfo("log4net.config"));
             log.Info("        =============  Started Logging  =============        ");
 
             bool isOwned;
@@ -119,7 +120,7 @@ namespace AjoibotBio
                 scanner.DisconnectDevice();
             }
 
-            zkfp2.Terminate();
+            ZkFingerprintLib.Terminate();
         }
     }
 }

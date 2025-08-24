@@ -11,15 +11,21 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Lib\libzkfpcsharp.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <Reference Include="libzkfpcsharp">
       <HintPath>Lib\libzkfpcsharp.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <!-- Copy native dependencies for both architectures into RID-specific runtimes folders -->
+  <ItemGroup>
+    <None Include="Lib\x64\*.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>runtimes\win-x64\native\%(Filename)%(Extension)</TargetPath>
+    </None>
+    <None Include="Lib\x86\*.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>runtimes\win-x86\native\%(Filename)%(Extension)</TargetPath>
+    </None>
   </ItemGroup>
 
 </Project>

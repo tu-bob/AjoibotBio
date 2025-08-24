@@ -44,6 +44,18 @@
     </Reference>
   </ItemGroup>
 
+  <!-- Ensure native fingerprint DLLs are present in app output in RID-specific folders -->
+  <ItemGroup>
+    <None Include="..\ZKFingerprint\Lib\x64\*.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>runtimes\win-x64\native\%(Filename)%(Extension)</TargetPath>
+    </None>
+    <None Include="..\ZKFingerprint\Lib\x86\*.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>runtimes\win-x86\native\%(Filename)%(Extension)</TargetPath>
+    </None>
+  </ItemGroup>
+
   <ItemGroup>
     <Resource Include="Assets\ajoibot-logo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

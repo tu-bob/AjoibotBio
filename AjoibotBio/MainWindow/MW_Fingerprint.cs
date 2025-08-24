@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using libzkfpcsharp;
 using ZKFingerprint;
 
 namespace AjoibotBio.MainWindow
@@ -20,9 +19,9 @@ namespace AjoibotBio.MainWindow
             Task.Run(() =>
             {
                 int res = 0;
-                if ((res = zkfp2.Init()) == zkfperrdef.ZKFP_ERR_OK)
+                if ((res = ZkFingerprintLib.Init()) == ZkFingerprintLib.ZKFP_ERR_OK)
                 {
-                    int dCount = zkfp2.GetDeviceCount();
+                    int dCount = ZkFingerprintLib.GetDeviceCount();
                     dCount = dCount > 4 ? 4 : dCount;
 
                     Log.Info($"Detected {dCount} fingerprint scanners");
