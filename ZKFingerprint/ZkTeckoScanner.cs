@@ -61,6 +61,11 @@ namespace ZKFingerprint
         {
             try
             {
+                if (DevHandle != IntPtr.Zero)
+                {
+                    Log.Info($"Device already open (index={DeviceIndex}, handle={DevHandle}).");
+                    return true;
+                }
                 Log.Info($"Attempting to open fingerprint device at index {DeviceIndex}...");
                 if (IntPtr.Zero == (DevHandle = zkfp2.OpenDevice(DeviceIndex)))
                 {
