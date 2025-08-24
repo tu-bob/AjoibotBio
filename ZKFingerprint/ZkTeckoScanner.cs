@@ -167,7 +167,6 @@ namespace ZKFingerprint
                         int ret = zkfp2.AcquireFingerprint(DevHandle, FpBuffer, CapTmp, ref templateSize);
                         if (ret == zkfp.ZKFP_ERR_OK)
                         {
-                            _acquireFailCount = 0; // reset on success
                             var image = new BitmapImage();
                             var mem = new MemoryStream();
                             BitmapFormat.GetBitmap(FpBuffer, mfpWidth, mfpHeight, ref mem);
@@ -186,28 +185,6 @@ namespace ZKFingerprint
                             var fingerPrint = Convert.ToBase64String(CapTmp, 0, templateSize);
                             Log.Info($"Fingerprint acquired successfully (index={DeviceIndex}, imageSize={imageBase64?.Length ?? 0}, templateSize={templateSize}).");
                             Application.Current.Dispatcher.Invoke(() => FingerPrintCaptured?.Invoke(DeviceIndex, imageBase64, fingerPrint));
-                        }
-                        else
-                        {
-                            _acquireFailCount++;
-                            if (_acquireFailCount % 20 == 1) // throttle logs to avoid flooding
-                            {
-                                Log.Debug($"AcquireFingerprint returned {ret} (index={DeviceIndex}), failCount={_acquireFailCount}.");
-                            }
-                            if (_acquireFailCount >= 200)
-                            {
-                                Log.Error($"AcquireFingerprint failed {_acquireFailCount} times consecutively. Assuming device disconnected (index={DeviceIndex}). Raising DeviceDisconnected and stopping capture.");
-                                try
-                                {
-                                    Application.Current?.Dispatcher?.Invoke(() => DeviceDisconnected?.Invoke());
-                                }
-                                catch (Exception exInvoke)
-                                {
-                                    Log.Warn("Exception while invoking DeviceDisconnected event.", exInvoke);
-                                }
-                                _isScanningOn = false;
-                                break;
-                            }
                         }
                         Thread.Sleep(50);
                     }
