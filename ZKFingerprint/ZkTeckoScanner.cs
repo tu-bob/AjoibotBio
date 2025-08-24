@@ -4,11 +4,14 @@ using System.IO;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using log4net;
 
 namespace ZKFingerprint
 {
     public class ZkTeckoScanner
     {
+        private static readonly ILog Log = LogManager.GetLogger(typeof(ZkTeckoScanner));
+
         #region Parameters
 
         private IntPtr DevHandle = IntPtr.Zero;
@@ -27,6 +30,7 @@ namespace ZKFingerprint
         public int DeviceIndex { get; set; }
 
         private readonly bool IsScanningOn = true;
+        private int _acquireFailCount = 0;
 
         #endregion
 
@@ -40,63 +44,96 @@ namespace ZKFingerprint
 
         public bool ConnectDevice()
         {
-            //TODO replace event
-            //GlobalVariables.DevHandles.Remove(DevHandle);
-            if (IntPtr.Zero == (DevHandle = zkfp2.OpenDevice(DeviceIndex)))
+            try
             {
-                //if (DeviceDisconnected != null)
-                //    Application.Current.Dispatcher.Invoke(DeviceDisconnected);
+                Log.Info($"Attempting to open fingerprint device at index {DeviceIndex}...");
+                if (IntPtr.Zero == (DevHandle = zkfp2.OpenDevice(DeviceIndex)))
+                {
+                    Log.Error($"Failed to open fingerprint device (index={DeviceIndex}). Returned handle is zero. Ensure drivers are installed and the device is connected.");
+                    return false;
+                }
+                Log.Info($"Fingerprint device opened successfully (index={DeviceIndex}, handle={DevHandle}).");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Exception while opening fingerprint device (index={DeviceIndex}).", ex);
                 return false;
             }
-            //GlobalVariables.DevHandles.Add(DevHandle);
-            return true;
         }
 
         public bool DisconnectDevice()
         {
-            for (int i = 101; i < 105; i++)
+            try
             {
-                int code = i;
-                byte[] turnOff = new byte[4];
-                zkfp2.Int2ByteArray(0, turnOff);
-                var ret = zkfp2.SetParameters(DevHandle, code, turnOff, 4);
-            }
+                Log.Info($"Disconnecting fingerprint device (index={DeviceIndex}, handle={DevHandle})...");
+                // Turn off all signals
+                for (int i = 101; i < 105; i++)
+                {
+                    int code = i;
+                    byte[] turnOff = new byte[4];
+                    zkfp2.Int2ByteArray(0, turnOff);
+                    var ret = zkfp2.SetParameters(DevHandle, code, turnOff, 4);
+                    Log.Debug($"SignalOff during disconnect: code={code}, ret={ret}");
+                }
 
-            if (zkfp2.CloseDevice(DevHandle) == 0)
+                int closeRet = zkfp2.CloseDevice(DevHandle);
+                bool success = (closeRet == 0);
+                if (success)
+                {
+                    Log.Info($"Fingerprint device disconnected successfully (index={DeviceIndex}).");
+                }
+                else
+                {
+                    Log.Error($"Failed to close fingerprint device (index={DeviceIndex}). CloseDevice returned {closeRet}.");
+                }
+                return success;
+            }
+            catch (Exception ex)
             {
-                //TODO replace with event
-                //GlobalVariables.DevHandles.Remove(DevHandle);
-                return true;
+                Log.Error($"Exception while disconnecting fingerprint device (index={DeviceIndex}).", ex);
+                return false;
             }
-
-            return false;
         }
 
         /// <summary>
         /// Acquire finger print image and print template CapTmp
         /// </summary>
-        /// <param name="image">New Bitmap image</param>
-        /// <returns>Print 0 if Ok, and -1 if device is unreachable</returns>
         public void CapturePrint()
         {
-            if (ConnectDevice())
+            try
             {
-                if (IntPtr.Zero != (DBHandle = zkfp2.DBInit()))
+                if (!ConnectDevice())
+                {
+                    Log.Error($"CapturePrint aborted: unable to connect to device (index={DeviceIndex}).");
+                    return;
+                }
+
+                Log.Debug("Initializing fingerprint database (DBInit)...");
+                DBHandle = zkfp2.DBInit();
+                if (IntPtr.Zero == DBHandle)
+                {
+                    Log.Error("DBInit returned null handle. Cannot proceed with fingerprint capture.");
+                    return;
+                }
+
+                try
                 {
                     byte[] paramValue = new byte[4];
                     int size = 4;
-                    zkfp2.GetParameters(DevHandle, 1, paramValue, ref size);
+                    int ret1 = zkfp2.GetParameters(DevHandle, 1, paramValue, ref size);
                     zkfp2.ByteArray2Int(paramValue, ref mfpWidth);
 
                     size = 4;
-                    zkfp2.GetParameters(DevHandle, 2, paramValue, ref size);
+                    int ret2 = zkfp2.GetParameters(DevHandle, 2, paramValue, ref size);
                     zkfp2.ByteArray2Int(paramValue, ref mfpHeight);
+
+                    Log.Info($"Fingerprint capture parameters: width={mfpWidth} (ret={ret1}), height={mfpHeight} (ret={ret2}), cbCapTmp={cbCapTmp}.");
 
                     while (IsScanningOn)
                     {
                         FpBuffer = new byte[mfpWidth * mfpHeight];
-                        int ret = zkfp2.AcquireFingerprint(DevHandle,
-                            FpBuffer, CapTmp, ref cbCapTmp);
+                        int ret = zkfp2.AcquireFingerprint(DevHandle, FpBuffer, CapTmp, ref cbCapTmp);
                         if (ret == zkfp.ZKFP_ERR_OK)
                         {
                             var image = new BitmapImage();
@@ -114,23 +151,34 @@ namespace ZKFingerprint
                             mem.Dispose();
                             var imageBase64 = BitmapFormat.BitmapToBase64(image);
                             var fingerPrint = Convert.ToBase64String(CapTmp);
-                            Application.Current.Dispatcher.Invoke(() => FingerPrintCaptured(DeviceIndex, imageBase64, fingerPrint));
+                            Log.Info($"Fingerprint acquired successfully (index={DeviceIndex}, imageSize={imageBase64?.Length ?? 0}, templateSize={cbCapTmp}).");
+                            Application.Current.Dispatcher.Invoke(() => FingerPrintCaptured?.Invoke(DeviceIndex, imageBase64, fingerPrint));
                         }
                         Thread.Sleep(50);
                     }
                 }
+                catch (Exception exInner)
+                {
+                    Log.Error("Exception during fingerprint acquisition loop.", exInner);
+                }
             }
-            //if (DeviceDisconnected != null)
-            //    Application.Current.Dispatcher.Invoke(DeviceDisconnected);
+            catch (Exception ex)
+            {
+                Log.Error("Unexpected exception in CapturePrint.", ex);
+            }
+            finally
+            {
+                // Optionally close on exit of capture logic
+                DisconnectDevice();
+            }
         }
 
         /// <summary>
         /// Alert signal with preset duration
         /// </summary>
-        /// <param name="code"></param>
-        /// <param name="duration"></param>
         public void AlertSignal(int code, int duration)
         {
+            Log.Debug($"AlertSignal: code={code}, duration={duration}ms.");
             SignalOn(code);
             Thread.Sleep(duration);
             SignalOff(code);
@@ -138,6 +186,7 @@ namespace ZKFingerprint
 
         private void ResetSignals()
         {
+            Log.Debug("ResetSignals: turning off codes 101..104.");
             for (int i = 101; i < 105; i++)
             {
                 int code = i;
@@ -146,21 +195,37 @@ namespace ZKFingerprint
         }
 
         /// <summary>
-        /// Activate light or sound on divice
+        /// Activate light or sound on device
         /// </summary>
         /// <param name="code">White = 101, Green = 102, Red = 103, Sound = 104</param>
         public void SignalOn(int code)
         {
-            byte[] turnOn = new byte[4];
-            zkfp2.Int2ByteArray(1, turnOn);
-            var ret = zkfp2.SetParameters(DevHandle, code, turnOn, 4);
+            try
+            {
+                byte[] turnOn = new byte[4];
+                zkfp2.Int2ByteArray(1, turnOn);
+                var ret = zkfp2.SetParameters(DevHandle, code, turnOn, 4);
+                Log.Debug($"SignalOn: code={code}, ret={ret}.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Exception in SignalOn (code={code}).", ex);
+            }
         }
 
         public void SignalOff(int code)
         {
-            byte[] turnOff = new byte[4];
-            zkfp2.Int2ByteArray(0, turnOff);
-            var ret = zkfp2.SetParameters(DevHandle, code, turnOff, 4);
+            try
+            {
+                byte[] turnOff = new byte[4];
+                zkfp2.Int2ByteArray(0, turnOff);
+                var ret = zkfp2.SetParameters(DevHandle, code, turnOff, 4);
+                Log.Debug($"SignalOff: code={code}, ret={ret}.");
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Exception in SignalOff (code={code}).", ex);
+            }
         }
     }
 }
