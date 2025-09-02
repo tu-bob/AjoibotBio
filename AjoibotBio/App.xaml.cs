@@ -5,7 +5,6 @@ using log4net;
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Principal;
 using System.Threading;
 using System.Windows;
 using ZKFaceId;
@@ -33,48 +32,6 @@ namespace AjoibotBio
             var logRepository = LogManager.GetRepository(System.Reflection.Assembly.GetEntryAssembly());
             log4net.Config.XmlConfigurator.Configure(logRepository, new System.IO.FileInfo("log4net.config"));
             log.Info("        =============  Started Logging  =============        ");
-
-            // Ensure the application is running with administrative privileges if required
-            try
-            {
-                var identity = WindowsIdentity.GetCurrent();
-                var principal = new WindowsPrincipal(identity);
-                if (!principal.IsInRole(WindowsBuiltInRole.Administrator))
-                {
-                    log.Warn("Application is not running as administrator. Attempting to relaunch elevated.");
-                    MessageBox.Show(
-                        "This application requires administrator privileges to properly initialize embedded browser and device drivers.\n" +
-                        "The application will relaunch with elevated permissions.",
-                        "Administrator Rights Required",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Information);
-
-                    var currentExe = Process.GetCurrentProcess().MainModule?.FileName ?? System.Reflection.Assembly.GetEntryAssembly()?.Location;
-                    var psi = new ProcessStartInfo(currentExe!)
-                    {
-                        UseShellExecute = true,
-                        Verb = "runas",
-                        Arguments = string.Join(" ", e.Args ?? Array.Empty<string>())
-                    };
-
-                    try
-                    {
-                        Process.Start(psi);
-                        // Close current (non-elevated) instance
-                        this.Shutdown();
-                        return;
-                    }
-                    catch (Exception startEx)
-                    {
-                        log.Error("Failed to relaunch application with elevated privileges.", startEx);
-                        // Continue without elevation; downstream components may fail if admin is truly required.
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                log.Error("Error while checking or acquiring administrative privileges.", ex);
-            }
 
             bool isOwned;
             this.mutex = new Mutex(true, UniqueMutexName, out isOwned);
