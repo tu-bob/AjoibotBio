@@ -22,6 +22,8 @@ namespace AjoibotBio.MainWindow
 
         public static IntPtr WindowHandle { get; private set; }
 
+        private bool _isWebViewAvailable;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -51,9 +53,30 @@ namespace AjoibotBio.MainWindow
 
         private void CheckPrerequisits()
         {
-            if (WebView2Install.GetInfo().Type != InstallType.WebView2)
+            var installInfo = WebView2Install.GetInfo();
+            _isWebViewAvailable = installInfo.Type == InstallType.WebView2;
+            if (!_isWebViewAvailable)
             {
                 Log.Error("WebView2 environment is not installed on current machine");
+                try
+                {
+                    MessageBox.Show(
+                        "Microsoft Edge WebView2 Runtime is not installed.\n" +
+                        "Please install it to enable the built-in browser.\n\n" +
+                        "We will open the official download page in your browser.",
+                        "WebView2 Runtime Required",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = "https://go.microsoft.com/fwlink/p/?LinkId=2124703",
+                        UseShellExecute = true
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Failed to open WebView2 installer page", ex);
+                }
             }
         }
 
@@ -77,7 +100,12 @@ namespace AjoibotBio.MainWindow
                 Application.Current.Dispatcher.Invoke(() => Application.Current.Shutdown());
             }
             else
-                NavigateToUri();
+            {
+                if (_isWebViewAvailable)
+                    NavigateToUri();
+                else
+                    Log.Warn("Skipping navigation because WebView2 runtime is not available.");
+            }
         }
 
         private void RestoreWindowSize(object sender, EventArgs e)
@@ -216,7 +244,7 @@ namespace AjoibotBio.MainWindow
         {
             if (e.IsSuccess)
             {
-                Log.Debug($"Core webview engine initialized");
+                Log.Debug("Core webview engine initialized");
 
                 await MainWebView.EnsureCoreWebView2Async();
 
@@ -226,7 +254,13 @@ namespace AjoibotBio.MainWindow
             }
             else
             {
-                Log.Debug($"Failed to inititalize webview engine");
+                Log.Error("Failed to initialize WebView2 engine", e.InitializationException);
+                MessageBox.Show(
+                    "Failed to initialize embedded browser (WebView2).\n" +
+                    "Please ensure the WebView2 Runtime is installed.",
+                    "WebView2 Initialization Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
@@ -242,9 +276,22 @@ namespace AjoibotBio.MainWindow
 
         private async void MainWebView_Loaded(object sender, RoutedEventArgs e)
         {
-            await MainWebView.EnsureCoreWebView2Async();
-            MainWebView.CoreWebView2.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
-            MainWebView.CoreWebView2.WebResourceRequested += OnWebResourceRequested;
+            if (!_isWebViewAvailable)
+            {
+                Log.Warn("WebView2 runtime not available. Skipping WebView initialization.");
+                return;
+            }
+
+            try
+            {
+                await MainWebView.EnsureCoreWebView2Async();
+                MainWebView.CoreWebView2.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
+                MainWebView.CoreWebView2.WebResourceRequested += OnWebResourceRequested;
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error ensuring WebView2 core during Loaded", ex);
+            }
         }
 
         private void OnWebResourceRequested(object sender, CoreWebView2WebResourceRequestedEventArgs e)

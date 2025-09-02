@@ -73,7 +73,21 @@ namespace AjoibotBio.MainWindow
         private void AjoibotFingerInvoke(int index, string image, string print)
         {
             Log.Info($"Fingerprint was captured by scanner with index of {index}. Executing js function AjoibtoFinger");
-            MainWebView.ExecuteScriptAsync($"AjoibotFinger('{print}', '{image}', '{index}')");
+            try
+            {
+                if (MainWebView?.CoreWebView2 != null)
+                {
+                    MainWebView.ExecuteScriptAsync($"AjoibotFinger('{print}', '{image}', '{index}')");
+                }
+                else
+                {
+                    Log.Warn("Cannot send fingerprint data to WebView: CoreWebView2 is not initialized.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error("Error executing AjoibotFinger script in WebView", ex);
+            }
         }
     }
 }

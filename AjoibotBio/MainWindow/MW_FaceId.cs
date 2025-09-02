@@ -84,7 +84,17 @@ namespace AjoibotBio.MainWindow
             }
             this.Dispatcher.Invoke(() =>
             {
-                MainWebView.ExecuteScriptAsync($"UpdateFrame('{imageBase64}')");
+                try
+                {
+                    if (MainWebView?.CoreWebView2 != null)
+                    {
+                        MainWebView.ExecuteScriptAsync($"UpdateFrame('{imageBase64}')");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Error executing UpdateFrame script in WebView", ex);
+                }
             });
         }
 
@@ -92,7 +102,17 @@ namespace AjoibotBio.MainWindow
         { 
             this.Dispatcher.Invoke(() =>
             {
-                MainWebView.ExecuteScriptAsync($"SetNewBioData({data.bioData}, {data.width}, {data.height})");
+                try
+                {
+                    if (MainWebView?.CoreWebView2 != null)
+                    {
+                        MainWebView.ExecuteScriptAsync($"SetNewBioData({data.bioData}, {data.width}, {data.height})");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error("Error executing SetNewBioData script in WebView", ex);
+                }
             });
         }
     }
